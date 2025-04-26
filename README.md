@@ -2,8 +2,7 @@
 
 ![CIAdmin](https://img.shields.io/badge/Administrador%20de%20Bases%20de%20Datos-CodeIgniter%204-EF4223?style=for-the-badge&logo=codeigniter&logoColor=white&labelColor=4223ef)
 
-**Crea tu panel de administración en segundos con CodeIgniter.**
-<br/><br/>
+## Crea tu panel de administración en segundos con CodeIgniter
 
 ---
 
@@ -130,6 +129,17 @@ Se recomienda cumplir con los requisitos mínimos de CodeIgniter 4:
 - Servidor Web (Apache, Nginx, etc.)
 
 Para mayor información sobre los requerimientos te sugiero que consultes la [documentación de CodeIniter](https://www.codeigniter.com/user_guide/intro/requirements.html) al respecto.
+<br/><br/>
+
+---
+
+<br/>
+
+## 👥 Autores
+
+- **Leonardo Panzardo**
+  - [GitHub](https://github.com/leopanzardo)
+  - [LinkedIn](https://www.linkedin.com/in/leopanzardo/)
 <br/><br/>
 
 ---

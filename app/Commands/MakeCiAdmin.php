@@ -154,9 +154,9 @@ class MakeCiAdmin extends BaseCommand
     
     protected function renderTemplate(string $templateName, array $vars = []): string
     {
-        $templatePath = APPPATH . "Templates/CiAdmin/{$templateName}.tpl.php";
+        $templatePath = APPPATH . "Templates/CiAdmin/{$templateName}.tpl";
         if (!file_exists($templatePath)) {
-            CLI::error("❌ No se encuentra el template: {$templateName}.tpl.php");
+            CLI::error("❌ No se encuentra el template: {$templateName}.tpl");
             return '';
         }
 
