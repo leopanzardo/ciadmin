@@ -1,5 +1,8 @@
 # CIAdmin
 
+> Crea tu panel de administración en segundos con CodeIgniter.
+
+
 **CIAdmin** es una herramienta para generar automáticamente una aplicación administrativa basada en una base de datos usando [CodeIgniter 4](https://codeigniter.com/).
 
 Su objetivo es simplificar la creación de sistemas CRUD monolíticos con mínimo esfuerzo, manteniendo el código generado limpio y fácil de extender. Es un excelente punto de partida para cualquier aplicación que requiera administrar bases de datos.
