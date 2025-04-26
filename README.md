@@ -129,7 +129,7 @@ Se recomienda cumplir con los requisitos mínimos de CodeIgniter 4:
 - MySQL o compatible
 - Servidor Web (Apache, Nginx, etc.)
 
-Para mayor información sobre los requerimientos te sugiero que consultes la documentación de CodeIniter al respecto.
+Para mayor información sobre los requerimientos te sugiero que consultes la [documentación de CodeIniter](https://www.codeigniter.com/user_guide/intro/requirements.html) al respecto.
 <br/><br/>
 
 ---
