@@ -254,16 +254,24 @@ class MakeCiAdmin extends BaseCommand
             CLI::write("⚠️ dashboard.php ya existe, no se sobrescribe.", 'light_gray');
         }
 
-        // Ahora registramos la ruta /
+        // Modificar o agregar la ruta '/' para que apunte al Dashboard
         $routesFile = APPPATH . 'Config/Routes.php';
         $routesContents = file_get_contents($routesFile);
 
-        if (strpos($routesContents, "->get('/', 'Dashboard::index'") === false) {
+        if (preg_match("/\\\$routes->get\\(\s*'\/'\s*,/", $routesContents)) {
+            // Si ya existe una ruta '/', la reemplazamos
+            $routesContents = preg_replace(
+                "/\\\$routes->get\\(\s*'\/'\s*,\s*'[^']+'\s*\);/",
+                "\$routes->get('/', 'Dashboard::index');",
+                $routesContents
+            );
+            file_put_contents($routesFile, $routesContents);
+            CLI::write("✅ Ruta '/' actualizada para usar Dashboard::index.", 'green');
+        } else {
+            // Si no existe, la agregamos al final
             $newRoute = "\n// Ruta principal generada automáticamente\n\$routes->get('/', 'Dashboard::index');\n";
             file_put_contents($routesFile, $newRoute, FILE_APPEND);
-            CLI::write("✅ Ruta principal '/' asignada al Dashboard.", 'green');
-        } else {
-            CLI::write("⚠️ Ruta principal '/' ya configurada.", 'light_gray');
+            CLI::write("✅ Ruta '/' creada para usar Dashboard::index.", 'green');
         }
     }
 
