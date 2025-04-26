@@ -1,0 +1,23 @@
+# Define archivos de texto
+*.php text
+*.html text
+*.css text
+*.js text
+*.json text
+*.xml text
+*.md text
+
+# Normalizar fin de línea a LF
+* text=auto eol=lf
+
+# Evitar falsos cambios por diferencias de EOL en Windows/Linux
+*.sh text eol=lf
+*.bat text eol=crlf
+
+# No trackear cambios de permisos en archivos
+* -diff
+
+# Linguist: ignora /vendor y /writable para el lenguaje principal del repo
+/vendor/* linguist-vendored
+/writable/* linguist-vendored
+/public/build/* linguist-vendored
