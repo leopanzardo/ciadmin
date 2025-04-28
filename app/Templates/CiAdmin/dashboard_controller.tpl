@@ -13,7 +13,7 @@ class Dashboard extends BaseController
         $tables = $db->listTables();
         $dbName = $db->database ?? 'CiAdmin';
 
-        return view('dashboard', [
+        return renderCiAdminView('dashboard', [
             'modules' => $tables,
             'dbName' => $dbName,
         ]);
