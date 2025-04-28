@@ -12,6 +12,7 @@ class MakeCiAdmin extends BaseCommand
     protected $group       = 'Generators';
     protected $name        = 'make:ciadmin';
     protected $description = 'Genera una app administrativa basada en la base de datos';
+    protected array $reservedViewFolders = ['ciadmin', 'shared', 'system'];
 
     public function run(array $params)
     {
@@ -66,10 +67,13 @@ class MakeCiAdmin extends BaseCommand
             return;
         }
 
+        $fields = $this->getTableFields($table);
+
         $code = $this->renderTemplate('controller', [
-            'controllerName' => $className,
-            'modelName' => $className . 'Model',
-            'viewFolder' => $table,
+            'controllerName'   => $className,
+            'modelName'        => $className . 'Model',
+            'viewFolder'       => $table,
+            'validationRules'  => $this->generateValidationRules($fields),
         ]);
 
         write_file($controllerPath, $code);
@@ -78,6 +82,13 @@ class MakeCiAdmin extends BaseCommand
 
     protected function generateViews(string $className, string $table)
     {
+        
+        // Verificar si el nombre de la tabla es una palabra reservada
+        if (in_array(strtolower($table), $this->reservedViewFolders)) {
+            CLI::error("❌ No se pueden generar vistas para la tabla reservada: {$table}");
+            return;
+        }
+        
         $viewDir = APPPATH . "Views/{$table}";
         if (!is_dir($viewDir)) {
             mkdir($viewDir, 0755, true);
@@ -179,7 +190,12 @@ class MakeCiAdmin extends BaseCommand
             if (in_array($field->name, ['id', 'created_at', 'updated_at'])) {
                 continue;
             }
-            $fields[] = $field->name;
+
+            $fields[] = [
+                'name'       => $field->name,
+                'type'       => strtolower($field->type),
+                'max_length' => property_exists($field, 'max_length') ? $field->max_length : null,
+            ];
         }
 
         return $fields;
@@ -190,17 +206,36 @@ class MakeCiAdmin extends BaseCommand
         $html = "";
 
         foreach ($fields as $field) {
+            $fieldName = $field['name'];
+            $fieldType = strtolower($field['type']);
+            $label = ucfirst(str_replace('_', ' ', $fieldName));
+
+            // Determinar tipo de input
+            $inputType = 'text';
+            if (str_contains($fieldName, 'email')) {
+                $inputType = 'email';
+            } elseif (str_contains($fieldName, 'password')) {
+                $inputType = 'password';
+            } elseif (in_array($fieldType, ['int', 'bigint', 'smallint', 'mediumint', 'tinyint'])) {
+                $inputType = 'number';
+            } elseif ($fieldType === 'date') {
+                $inputType = 'date';
+            } elseif (in_array($fieldType, ['datetime', 'timestamp'])) {
+                $inputType = 'datetime-local';
+            }
+
+            // Determinar valor
             if ($source === 'post') {
-                $value = '';
+                $value = '<?= old(\'' . $fieldName . '\') ?>';
             } else {
-                $value = '<?= $row[\'' . $field . '\'] ?? \'\' ?>';
+                $value = '<?= old(\'' . $fieldName . '\', $row[\'' . $fieldName . '\'] ?? \'\') ?>';
             }
 
             $html .= <<<EOT
-    <p>
-        <label for="{$field}">{$field}</label>
-        <input type="text" name="{$field}" id="{$field}" value="{$value}" />
-    </p>
+    <div class="mb-3 col-md-6">
+        <label for="{$fieldName}" class="form-label">{$label}</label>
+        <input type="{$inputType}" class="form-control" id="{$fieldName}" name="{$fieldName}" value="{$value}">
+    </div>
 
     EOT;
         }
@@ -208,12 +243,64 @@ class MakeCiAdmin extends BaseCommand
         return $html;
     }
     
+    protected function generateValidationRules(array $fields): string
+    {
+        $rules = [];
+
+        foreach ($fields as $field) {
+            $name = $field['name'];
+            $type = strtolower($field['type']);
+            $maxLength = $field['max_length'] ?? null;
+
+            $rule = [];
+
+            // No validamos campos opcionales tipo timestamps
+            if (in_array($name, ['created_at', 'updated_at'])) {
+                continue;
+            }
+
+            // Siempre pedimos que los campos sean requeridos (puede mejorarse más adelante)
+            $rule[] = 'required';
+
+            // Tipos especiales
+            if (str_contains($name, 'email')) {
+                $rule[] = 'valid_email';
+            } elseif (str_contains($name, 'password')) {
+                $rule[] = 'min_length[6]';
+            } elseif (in_array($type, ['int', 'bigint', 'smallint', 'tinyint', 'mediumint'])) {
+                $rule[] = 'integer';
+            } elseif (in_array($type, ['decimal', 'float', 'double'])) {
+                $rule[] = 'decimal';
+            } elseif (in_array($type, ['date'])) {
+                $rule[] = 'valid_date';
+            } elseif (in_array($type, ['datetime', 'timestamp'])) {
+                // Opcionalmente podríamos validar formato datetime aquí
+            }
+
+            // Si sabemos el largo máximo
+            if ($maxLength && is_numeric($maxLength) && $maxLength > 0) {
+                $rule[] = "max_length[{$maxLength}]";
+            }
+
+            $rules[$name] = implode('|', $rule);
+        }
+
+        // Formatear para insertar en el controller
+        $rulesString = "[\n";
+        foreach ($rules as $fieldName => $fieldRules) {
+            $rulesString .= "            '{$fieldName}' => '{$fieldRules}',\n";
+        }
+        $rulesString .= "        ]";
+
+        return $rulesString;
+    }
+    
     protected function generateTableFields(array $fields): array
     {
         // Encabezados de la tabla
         $thead = "";
         foreach ($fields as $field) {
-            $thead .= "                <th>" . ucfirst($field) . "</th>\n";
+            $thead .= "                <th>" . ucfirst(str_replace('_', ' ', $field['name'])) . "</th>\n";
         }
         $thead .= "                <th>Acciones</th>\n";
 
@@ -222,11 +309,11 @@ class MakeCiAdmin extends BaseCommand
         $tbody .= "            <?php foreach (\$rows as \$row): ?>\n";
         $tbody .= "            <tr>\n";
         foreach ($fields as $field) {
-            $tbody .= "                <td><?= \$row['{$field}'] ?? '' ?></td>\n";
+            $tbody .= "                <td><?= \$row['{$field['name']}'] ?? '' ?></td>\n";
         }
         $tbody .= "                <td>\n";
-        $tbody .= "                    <a href=\"<?= site_url('<?= \$viewFolder ?>/edit/' . \$row['id']) ?>\">Editar</a> |\n";
-        $tbody .= "                    <a href=\"<?= site_url('<?= \$viewFolder ?>/delete/' . \$row['id']) ?>\" onclick=\"return confirm('¿Seguro que desea eliminar este registro?')\">Eliminar</a>\n";
+        $tbody .= "                    <a href=\"<?= site_url('<?= \$viewFolder ?>/edit/' . \$row['id']) ?>\" class=\"btn btn-sm btn-primary\">Editar</a>\n";
+        $tbody .= "                    <a href=\"<?= site_url('<?= \$viewFolder ?>/delete/' . \$row['id']) ?>\" class=\"btn btn-sm btn-danger\" onclick=\"return confirm('¿Seguro que desea eliminar este registro?')\">Eliminar</a>\n";
         $tbody .= "                </td>\n";
         $tbody .= "            </tr>\n";
         $tbody .= "            <?php endforeach; ?>\n";

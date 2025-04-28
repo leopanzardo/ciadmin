@@ -1,16 +1,14 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Crear {{viewFolder}}</title>
-</head>
-<body>
-    <h1>Crear {{viewFolder}}</h1>
+<div class="container">
+    <h1 class="mb-4">Crear {{viewFolder}}</h1>
 
     <form method="post" action="<?= site_url('{{viewFolder}}/store') ?>">
-        {{formFields}}
-        <button type="submit">Guardar</button>
-    </form>
+        <div class="row">
+            {{formFields}}
+        </div>
 
-    <p><a href="<?= site_url('{{viewFolder}}') ?>">Volver al listado</a></p>
-</body>
-</html>
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a href="<?= site_url('{{viewFolder}}') ?>" class="btn btn-secondary">Volver al listado</a>
+        </div>
+    </form>
+</div>

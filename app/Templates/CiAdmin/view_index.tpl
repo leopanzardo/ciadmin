@@ -1,23 +1,20 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Listado de {{viewFolder}}</title>
-</head>
-<body>
-    <h1>Listado de {{viewFolder}}</h1>
+<div class="container">
+    <h1 class="mb-4">Listado de {{viewFolder}}</h1>
 
-    <p><a href="<?= site_url('{{viewFolder}}/create') ?>">Crear Nuevo</a></p>
+    <div class="mb-3">
+        <a href="<?= site_url('{{viewFolder}}/create') ?>" class="btn btn-success">Crear Nuevo</a>
+    </div>
 
-    <table border="1" cellpadding="5">
-        <thead>
-            <tr>
-{{thead}}
-            </tr>
-        </thead>
-        <tbody>
-{{tbody}}
-        </tbody>
-    </table>
-
-</body>
-</html>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    {{thead}}
+                </tr>
+            </thead>
+            <tbody>
+                {{tbody}}
+            </tbody>
+        </table>
+    </div>
+</div>
