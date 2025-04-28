@@ -27,7 +27,7 @@ class MakeCiAdmin extends BaseCommand
     {
         CLI::write('🚀 Iniciando generación de CIAdmin...', 'green');
 
-        $force = in_array('--force', $params) || in_array('-f', $params);
+        $force = array_key_exists('force', $params) || array_key_exists('f', $params);
 
         $db = Database::connect();
         $forge = \Config\Database::forge();
