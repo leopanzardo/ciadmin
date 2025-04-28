@@ -6,7 +6,7 @@ if (!function_exists('renderCiAdminView')) {
         $html = '';
 
         // Renderizar header
-        $headerPath = APPPATH . 'Views/ciadmin/header.tpl';
+        $headerPath = APPPATH . 'Views/ciadmin/header.php';
         if (file_exists($headerPath)) {
             $html .= parseTemplate(file_get_contents($headerPath), $data);
         }
@@ -14,11 +14,12 @@ if (!function_exists('renderCiAdminView')) {
         // Renderizar contenido
         $contentPath = APPPATH . "Views/{$contentView}.php";
         if (file_exists($contentPath)) {
-            $html .= parseTemplate(file_get_contents($contentPath), $data);
+            // El contenido central (create, edit, index, etc.) se asume como PHP real
+            $html .= view($contentView, $data);
         }
 
         // Renderizar footer
-        $footerPath = APPPATH . 'Views/ciadmin/footer.tpl';
+        $footerPath = APPPATH . 'Views/ciadmin/footer.php';
         if (file_exists($footerPath)) {
             $html .= parseTemplate(file_get_contents($footerPath), $data);
         }
