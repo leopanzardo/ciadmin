@@ -12,6 +12,14 @@ class MakeCiAdmin extends BaseCommand
     protected $group       = 'Generators';
     protected $name        = 'make:ciadmin';
     protected $description = 'Genera una app administrativa basada en la base de datos';
+
+    protected $usage = 'php spark make:ciadmin [options]';
+    protected $arguments = [];
+    protected $options = [
+        '--force' => 'Sobrescribe archivos existentes.',
+        '-f' => 'Alias de --force para sobrescribir archivos.',
+    ];
+
     protected array $reservedViewFolders = ['ciadmin', 'shared', 'system'];
     protected array $routesToWrite = [];
 
@@ -405,7 +413,6 @@ class MakeCiAdmin extends BaseCommand
     /**
      * @var RouteCollection \$routes
      */
-    \$routes = Services::routes();
 
     \$routes->setDefaultNamespace('App\\Controllers');
     \$routes->setDefaultController('Dashboard');
