@@ -192,13 +192,18 @@ class MakeCiAdmin extends BaseCommand
         }
 
         $viewPath = APPPATH . "Views/dashboard.php";
+        $templatePath = APPPATH . "Templates/CiAdmin/dashboard_view.php"; // <- Cambiamos esto
+
         if (($force === false) && file_exists($viewPath)) {
             CLI::write("dashboard.php ya existe, no se sobrescribe.", 'orange');
         } else {
-            $template = file_get_contents(APPPATH . "Templates/CiAdmin/dashboard_view.tpl");
-            write_file($viewPath, $template);
-            CLI::write("Vista dashboard generada: dashboard.php", $force ? 'light_blue' : 'green');
-            $this->viewsCreated++;
+            if (file_exists($templatePath)) {
+                copy($templatePath, $viewPath);
+                CLI::write("Vista dashboard generada: dashboard.php", $force ? 'light_blue' : 'green');
+                $this->viewsCreated++;
+            } else {
+                CLI::error("No se encontró el template dashboard_view.php para el Dashboard.");
+            }
         }
 
         // Modificar o agregar la ruta '/'
