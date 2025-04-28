@@ -31,6 +31,9 @@ if (!function_exists('parseTemplate')) {
     function parseTemplate(string $template, array $vars = []): string
     {
         foreach ($vars as $key => $value) {
+            if (!is_scalar($value)) {
+                $value = (string) json_encode($value);
+            }
             $template = str_replace('{{' . $key . '}}', $value, $template);
         }
 

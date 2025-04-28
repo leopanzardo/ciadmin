@@ -1,5 +1,5 @@
 <div class="container">
-    <h1 class="mb-4">Panel de Administración</h1>
+    <h1 class="mb-4"><?= esc($dbName) ?></h1>
 
     <?php if (!empty($modules)): ?>
         <div class="list-group">

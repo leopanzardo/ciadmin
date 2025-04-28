@@ -195,7 +195,7 @@ class MakeCiAdmin extends BaseCommand
         if (($force === false) && file_exists($viewPath)) {
             CLI::write("dashboard.php ya existe, no se sobrescribe.", 'orange');
         } else {
-            $template = $this->renderTemplate('dashboard_view', []);
+            $template = file_get_contents(APPPATH . "Templates/CiAdmin/dashboard_view.tpl");
             write_file($viewPath, $template);
             CLI::write("Vista dashboard generada: dashboard.php", $force ? 'light_blue' : 'green');
             $this->viewsCreated++;

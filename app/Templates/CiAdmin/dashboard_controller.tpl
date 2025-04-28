@@ -11,11 +11,17 @@ class Dashboard extends BaseController
     {
         $db = Database::connect();
         $tables = $db->listTables();
-        $dbName = $db->database ?? 'CiAdmin';
+        $dbName = $db->database ?? 'CIAdmin';
+
+        $pageTitle = 'Panel de Administración';
+        if (!empty($dbName)) {
+            $pageTitle .= ' - ' . ucfirst($dbName);
+        }
 
         return renderCiAdminView('dashboard', [
+            'title'   => $pageTitle,
             'modules' => $tables,
-            'dbName' => $dbName,
+            'dbName'  => $dbName,
         ]);
     }
 }
