@@ -14,7 +14,7 @@ class Dashboard extends BaseController
         $dbName = $db->database ?? 'CiAdmin';
 
         return view('dashboard', [
-            'tables' => $tables,
+            'modules' => $tables,
             'dbName' => $dbName,
         ]);
     }

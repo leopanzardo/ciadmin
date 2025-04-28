@@ -3,7 +3,7 @@
 
     <div class="list-group">
         <?php foreach ($modules as $module): ?>
-            <a href="<?= site_url('<?= $module ?>') ?>" class="list-group-item list-group-item-action">
+            <a href="<?= site_url($module) ?>" class="list-group-item list-group-item-action">
                 <?= ucfirst(str_replace('_', ' ', $module)) ?>
             </a>
         <?php endforeach; ?>
