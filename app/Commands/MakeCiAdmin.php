@@ -13,6 +13,7 @@ class MakeCiAdmin extends BaseCommand
     protected $name        = 'make:ciadmin';
     protected $description = 'Genera una app administrativa basada en la base de datos';
     protected array $reservedViewFolders = ['ciadmin', 'shared', 'system'];
+    protected array $routesToWrite = [];
 
     public function run(array $params)
     {
@@ -37,9 +38,15 @@ class MakeCiAdmin extends BaseCommand
             $this->generateModel($className, $table, $force);
             $this->generateController($className, $table, $force);
             $this->generateViews($className, $table, $force);
+
+            // Acumulamos rutas para este controlador
+            $this->addRoutesForTable($className, $table);
         }
-        
+
         $this->generateDashboard($force);
+
+        // Finalmente, escribir el nuevo Routes.php
+        $this->generateRoutesFile();
 
         CLI::write("✅ CIAdmin generado con éxito.", 'green');
     }
@@ -48,7 +55,7 @@ class MakeCiAdmin extends BaseCommand
     {
         $modelPath = APPPATH . "Models/{$className}Model.php";
 
-        if (! $force && file_exists($modelPath)) {
+        if (($force === false) && file_exists($modelPath)) {
             CLI::write("⚠️ Modelo ya existe: {$className}Model.php", 'light_gray');
             return;
         }
@@ -71,7 +78,7 @@ class MakeCiAdmin extends BaseCommand
     {
         $controllerPath = APPPATH . "Controllers/{$className}.php";
 
-        if (! $force && file_exists($controllerPath)) {
+        if (($force === false) && file_exists($controllerPath)) {
             CLI::write("⚠️ Controlador ya existe: {$className}.php", 'light_gray');
             return;
         }
@@ -110,7 +117,7 @@ class MakeCiAdmin extends BaseCommand
 
         // Index view
         $indexViewPath = "{$viewDir}/index.php";
-        if (! $force && file_exists($indexViewPath)) {
+        if (($force === false) && file_exists($indexViewPath)) {
             CLI::write("⚠️ Vista index ya existe: {$table}/index.php", 'light_gray');
         } else {
             list($thead, $tbody) = $this->generateTableFields($fields);
@@ -126,7 +133,7 @@ class MakeCiAdmin extends BaseCommand
 
         // Create view
         $createViewPath = "{$viewDir}/create.php";
-        if (! $force && file_exists($createViewPath)) {
+        if (($force === false) && file_exists($createViewPath)) {
             CLI::write("⚠️ Vista create ya existe: {$table}/create.php", 'light_gray');
         } else {
             $formFields = $this->generateFormFields($fields, 'post');
@@ -140,7 +147,7 @@ class MakeCiAdmin extends BaseCommand
 
         // Edit view
         $editViewPath = "{$viewDir}/edit.php";
-        if (! $force && file_exists($editViewPath)) {
+        if (($force === false) && file_exists($editViewPath)) {
             CLI::write("⚠️ Vista edit ya existe: {$table}/edit.php", 'light_gray');
         } else {
             $formFields = $this->generateFormFields($fields, 'row');
@@ -150,6 +157,45 @@ class MakeCiAdmin extends BaseCommand
             ]);
             write_file($editViewPath, $html);
             CLI::write(($force ? "✏️" : "✅") . " Vista edit generada: {$table}/edit.php", $force ? 'yellow' : 'green');
+        }
+    }
+    
+    protected function generateDashboard(bool $force = false)
+    {
+        $controllerPath = APPPATH . "Controllers/Dashboard.php";
+        if (($force === false) && file_exists($controllerPath)) {
+            CLI::write("⚠️ Dashboard.php ya existe, no se sobrescribe.", 'light_gray');
+        } else {
+            $template = $this->renderTemplate('dashboard_controller', []);
+            write_file($controllerPath, $template);
+            CLI::write(($force ? "✏️" : "✅") . " Controlador Dashboard generado: Dashboard.php", $force ? 'yellow' : 'green');
+        }
+
+        $viewPath = APPPATH . "Views/dashboard.php";
+        if (($force === false) && file_exists($viewPath)) {
+            CLI::write("⚠️ dashboard.php ya existe, no se sobrescribe.", 'light_gray');
+        } else {
+            $template = $this->renderTemplate('dashboard_view', []);
+            write_file($viewPath, $template);
+            CLI::write(($force ? "✏️" : "✅") . " Vista dashboard generada: dashboard.php", $force ? 'yellow' : 'green');
+        }
+
+        // Modificar o agregar la ruta '/'
+        $routesFile = APPPATH . 'Config/Routes.php';
+        $routesContents = file_get_contents($routesFile);
+
+        if (preg_match("/\\\$routes->get\\(\s*'\/'\s*,/", $routesContents)) {
+            $routesContents = preg_replace(
+                "/\\\$routes->get\\(\s*'\/'\s*,\s*'[^']+'\s*\);/",
+                "\$routes->get('/', 'Dashboard::index');",
+                $routesContents
+            );
+            file_put_contents($routesFile, $routesContents);
+            CLI::write("✅ Ruta '/' actualizada para usar Dashboard::index.", 'green');
+        } else {
+            $newRoute = "\n// Ruta principal generada automáticamente\n\$routes->get('/', 'Dashboard::index');\n";
+            file_put_contents($routesFile, $newRoute, FILE_APPEND);
+            CLI::write("✅ Ruta '/' creada para usar Dashboard::index.", 'green');
         }
     }
     
@@ -339,43 +385,49 @@ class MakeCiAdmin extends BaseCommand
         return [$thead, $tbody];
     }
     
-    protected function generateDashboard(bool $force = false)
+    protected function addRoutesForTable(string $className, string $table)
     {
-        $controllerPath = APPPATH . "Controllers/Dashboard.php";
-        if (! $force && file_exists($controllerPath)) {
-            CLI::write("⚠️ Dashboard.php ya existe, no se sobrescribe.", 'light_gray');
-        } else {
-            $template = $this->renderTemplate('dashboard_controller', []);
-            write_file($controllerPath, $template);
-            CLI::write(($force ? "✏️" : "✅") . " Controlador Dashboard generado: Dashboard.php", $force ? 'yellow' : 'green');
+        $this->routesToWrite[] = "\$routes->get('{$table}', '{$className}::index');";
+        $this->routesToWrite[] = "\$routes->get('{$table}/create', '{$className}::create');";
+        $this->routesToWrite[] = "\$routes->post('{$table}/store', '{$className}::store');";
+        $this->routesToWrite[] = "\$routes->get('{$table}/edit/(:num)', '{$className}::edit/\$1');";
+        $this->routesToWrite[] = "\$routes->post('{$table}/update/(:num)', '{$className}::update/\$1');";
+        $this->routesToWrite[] = "\$routes->get('{$table}/delete/(:num)', '{$className}::delete/\$1');";
+    }
+    
+    protected function generateRoutesFile()
+    {
+        $content = <<<PHP
+    <?php
+
+    use CodeIgniter\\Router\\RouteCollection;
+
+    /**
+     * @var RouteCollection \$routes
+     */
+    \$routes = Services::routes();
+
+    \$routes->setDefaultNamespace('App\\Controllers');
+    \$routes->setDefaultController('Dashboard');
+    \$routes->setDefaultMethod('index');
+    \$routes->setTranslateURIDashes(false);
+    \$routes->set404Override();
+    \$routes->setAutoRoute(false);
+
+    // Ruta principal
+    \$routes->get('/', 'Dashboard::index');
+
+    // Rutas generadas automáticamente
+    PHP;
+
+        foreach ($this->routesToWrite as $route) {
+            $content .= "\n" . $route;
         }
 
-        $viewPath = APPPATH . "Views/dashboard.php";
-        if (! $force && file_exists($viewPath)) {
-            CLI::write("⚠️ dashboard.php ya existe, no se sobrescribe.", 'light_gray');
-        } else {
-            $template = $this->renderTemplate('dashboard_view', []);
-            write_file($viewPath, $template);
-            CLI::write(($force ? "✏️" : "✅") . " Vista dashboard generada: dashboard.php", $force ? 'yellow' : 'green');
-        }
+        $routesPath = APPPATH . 'Config/Routes.php';
+        write_file($routesPath, $content);
 
-        // Modificar o agregar la ruta '/'
-        $routesFile = APPPATH . 'Config/Routes.php';
-        $routesContents = file_get_contents($routesFile);
-
-        if (preg_match("/\\\$routes->get\\(\s*'\/'\s*,/", $routesContents)) {
-            $routesContents = preg_replace(
-                "/\\\$routes->get\\(\s*'\/'\s*,\s*'[^']+'\s*\);/",
-                "\$routes->get('/', 'Dashboard::index');",
-                $routesContents
-            );
-            file_put_contents($routesFile, $routesContents);
-            CLI::write("✅ Ruta '/' actualizada para usar Dashboard::index.", 'green');
-        } else {
-            $newRoute = "\n// Ruta principal generada automáticamente\n\$routes->get('/', 'Dashboard::index');\n";
-            file_put_contents($routesFile, $newRoute, FILE_APPEND);
-            CLI::write("✅ Ruta '/' creada para usar Dashboard::index.", 'green');
-        }
+        CLI::write("✅ Archivo Routes.php sobrescrito exitosamente.", 'green');
     }
 
 }
