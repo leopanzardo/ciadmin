@@ -12,12 +12,15 @@ class MakeCiAdmin extends BaseCommand
     protected $group       = 'Generators';
     protected $name        = 'make:ciadmin';
     protected $description = 'Genera una app administrativa basada en la base de datos';
-
     protected $usage = 'php spark make:ciadmin [options]';
-    protected $arguments = [];
-    protected $options = [
+    protected array $arguments = [];
+    protected array $options = [
         '--force' => 'Sobrescribe archivos existentes.',
-        '-f' => 'Alias de --force para sobrescribir archivos.',
+        '-f'      => 'Alias de --force.',
+        '--only'  => 'Regenera solo las rutas.',
+        '-o'      => 'Alias de --only.',
+        '--appname' => 'Nombre de la aplicación a usar en el dashboard y el header.',
+        '-a'       => 'Alias de --appname.',
     ];
 
     protected array $reservedViewFolders = ['ciadmin', 'shared', 'system'];
@@ -27,39 +30,63 @@ class MakeCiAdmin extends BaseCommand
     protected int $controllersCreated = 0;
     protected int $viewsCreated = 0;
 
-
     public function run(array $params)
     {
         CLI::write('Iniciando generación de CIAdmin...', 'green');
 
+        // Manejar parámetros
         $force = array_key_exists('force', $params) || array_key_exists('f', $params);
+        $only = $params['only'] ?? $params['o'] ?? null;
+        $specificTables = $params['table'] ?? $params['t'] ?? null;
+        $appName = $params['appname'] ?? $params['a'] ?? null;
 
+        // Si se pasa un nuevo nombre de aplicación, actualizamos la constante
+        if ($appName) {
+            $this->updateAppNameConstant($appName);
+        }
+
+        // Conectar a base de datos
         $db = Database::connect();
-        $forge = \Config\Database::forge();
-        $tables = $db->listTables();
 
-        if (empty($tables)) {
-            CLI::error('No se encontraron tablas en la base de datos.');
+        if ($specificTables) {
+            $specificTables = array_map('trim', explode(',', $specificTables));
+        } else {
+            $specificTables = $db->listTables();
+        }
+
+        if (empty($specificTables)) {
+            CLI::error('No se encontraron tablas para procesar.');
             return;
         }
 
-        foreach ($tables as $table) {
+        foreach ($specificTables as $table) {
             $className = ucfirst($table);
 
             CLI::write("Procesando tabla: {$table}", 'light_blue');
 
-            $this->generateModel($className, $table, $force);
-            $this->generateController($className, $table, $force);
-            $this->generateViews($className, $table, $force);
+            if (!$only || $only === 'models') {
+                $this->generateModel($className, $table, $force);
+            }
+            if (!$only || $only === 'controllers') {
+                $this->generateController($className, $table, $force);
+            }
+            if (!$only || $only === 'views') {
+                $this->generateViews($className, $table, $force);
+            }
 
-            // Acumulamos rutas para este controlador
-            $this->addRoutesForTable($className, $table);
+            if (!$only || $only === 'routes') {
+                $this->addRoutesForTable($className, $table);
+            }
         }
 
-        $this->generateDashboard($force);
+        if (!$only || $only === 'dashboard') {
+            $this->generateDashboard($force);
+        }
 
-        // Finalmente, escribir el nuevo Routes.php
-        $this->generateRoutesFile();
+        if (!$only || $only === 'routes') {
+            $this->generateRoutesFile();
+        }
+
         $this->showGenerationSummary();
 
         CLI::write("CIAdmin generado con éxito!", 'green');
@@ -489,6 +516,31 @@ class MakeCiAdmin extends BaseCommand
         write_file($routesPath, $content);
 
         CLI::write("Archivo Routes.php sobrescrito exitosamente.", 'green');
+    }
+    
+    protected function updateAppNameConstant(string $appName): void
+    {
+        $constantsPath = APPPATH . 'Config/Constants.php';
+
+        // Leemos el contenido existente
+        $content = file_get_contents($constantsPath);
+
+        // Si ya existe CIADMIN_APPNAME, lo reemplazamos
+        if (strpos($content, 'CIADMIN_APPNAME') !== false) {
+            $content = preg_replace(
+                "/defined\('CIADMIN_APPNAME'\)\s*\|\|\s*define\('CIADMIN_APPNAME',\s*'[^']*'\);/",
+                "defined('CIADMIN_APPNAME') || define('CIADMIN_APPNAME', '{$appName}');",
+                $content
+            );
+            CLI::write("Constante CIADMIN_APPNAME actualizada en Constants.php.", 'green');
+        } else {
+            // Si no existe, la agregamos al final
+            $content .= "\n\ndefined('CIADMIN_APPNAME') || define('CIADMIN_APPNAME', '{$appName}');";
+            CLI::write("Constante CIADMIN_APPNAME agregada a Constants.php.", 'green');
+        }
+
+        // Guardamos los cambios
+        write_file($constantsPath, $content);
     }
 
 }
