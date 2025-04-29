@@ -14,7 +14,7 @@ class MakeCiAdmin extends BaseCommand
     protected $description = 'Genera una app administrativa basada en la base de datos';
     protected $usage = 'php spark make:ciadmin [options]';
     protected array $arguments = [];
-    protected array $options = [
+    protected $options = [
         '--force' => 'Sobrescribe archivos existentes.',
         '-f'      => 'Alias de --force.',
         '--only'  => 'Regenera solo las rutas.',
