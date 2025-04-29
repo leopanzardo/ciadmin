@@ -6,8 +6,6 @@
 
 ---
 
-<br/>
-
 ## 📋 Descripción
 
 **CIAdmin** es una herramienta para generar automáticamente una aplicación administrativa basada en una base de datos utilizando [CodeIgniter 4](https://codeigniter.com/).
@@ -17,8 +15,6 @@ Es un excelente punto de partida para cualquier aplicación que requiera adminis
 <br/><br/>
 
 ---
-
-<br/>
 
 ## 🚀 Instalación
 
@@ -30,11 +26,8 @@ Abrí una terminal y ejecutá:
 mkdir MiProyecto
 cd MiProyecto
 ```
-<br/>
 
 ---
-
-<br/>
 
 ### 🧩 Clonar el repositorio
 
@@ -59,8 +52,6 @@ git clone https://github.com/leopanzardo/ciadmin.git .
 
 ---
 
-<br/>
-
 ### ⚙️ Instalar dependencias
 
 Una vez clonado el proyecto y ubicado en la carpeta en que lo clonaste, instalá las dependencias de Composer:
@@ -68,11 +59,8 @@ Una vez clonado el proyecto y ubicado en la carpeta en que lo clonaste, instalá
 ```
 composer install
 ```
-<br/>
 
 ---
-
-<br/>
 
 ### 🛠️ Configurar la conexión a la base de datos
 
@@ -84,8 +72,6 @@ Configurá tu conexión como en cualquier proyecto de CodeIgniter 4, ya sea:
 
 ---
 
-<br/>
-
 ### 🛠️ Configuración del Servidor
 
 Asegurate de configurar los siguientes parámetros en app/Config/App.php:
@@ -95,11 +81,8 @@ public string $baseURL = 'http://tu-dominio.local/'; // O localhost si usás php
 public array $allowedHostnames = ['tu-dominio.local']; // Igual que baseURL, sin la barra final
 public string $indexPage = ''; // Dejar vacío para eliminar index.php de las URLs
 ```
-<br/><br/>
 
 ---
-
-<br/>
 
 ### 🛠️ .htaccess
 
@@ -110,8 +93,6 @@ Importante: Asegurate de que el módulo mod_rewrite esté habilitado en Apache.
 <br/><br/>
 
 ---
-
-<br/>
 
 ### 🛠️ Virtual Host (si usás Apache)
 
@@ -133,11 +114,8 @@ Luego recordá agregar el dominio en tu archivo hosts, por ejemplo:
 ```
 127.0.0.1   tu-dominio.local
 ```
-<br/><br/>
 
 ---
-
-<br/>
 
 ### ⚙️ Uso
 
@@ -158,8 +136,6 @@ Esto generará automáticamente:
 
 ---
 
-<br/>
-
 ### Opciones disponibles
 
 - --force (-f) ➔ Fuerza la sobreescritura de archivos existentes.
@@ -168,8 +144,6 @@ Esto generará automáticamente:
 <br/><br/>
 
 ---
-
-<br/>
 
 ### Ejemplos
 
@@ -184,11 +158,8 @@ Regenerar únicamente las vistas:
 ```
 php spark make:ciadmin --only=view --force
 ```
-<br/><br/>
 
 ---
-
-<br/>
 
 ### 🧪 Probar la aplicación
 
@@ -211,8 +182,6 @@ Eso lanzará el servidor de desarrollo incluído en CodeIgniter y podrás accede
 
 ---
 
-<br/>
-
 ### 📋 Requisitos
 
 Se recomienda cumplir con los requisitos mínimos de CodeIgniter 4:
@@ -227,8 +196,6 @@ Para mayor información sobre los requerimientos te sugiero que consultes la [do
 
 ---
 
-<br/>
-
 ## 👥 Autores
 
 - **Leonardo Panzardo**
@@ -237,8 +204,6 @@ Para mayor información sobre los requerimientos te sugiero que consultes la [do
 <br/><br/>
 
 ---
-
-<br/>
 
 ### 📚 Créditos
 
