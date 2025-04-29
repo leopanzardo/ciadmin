@@ -70,7 +70,7 @@ class MakeCiAdmin extends BaseCommand
         $modelPath = APPPATH . "Models/{$className}Model.php";
 
         if (($force === false) && file_exists($modelPath)) {
-            CLI::write("Modelo ya existe: {$className}Model.php", 'orange');
+            CLI::write("-> Modelo ya existe: {$className}Model.php", 'orange');
             return;
         }
 
@@ -82,9 +82,9 @@ class MakeCiAdmin extends BaseCommand
         write_file($modelPath, $code);
 
         if ($force && file_exists($modelPath)) {
-            CLI::write("Modelo sobrescrito: {$className}Model.php", 'light_blue');
+            CLI::write("-> Modelo sobrescrito: {$className}Model.php", 'light_blue');
         } else {
-            CLI::write("Modelo creado: {$className}Model.php", 'green');
+            CLI::write("-> Modelo creado: {$className}Model.php", 'green');
             $this->modelsCreated++;
         }
     }
@@ -94,7 +94,7 @@ class MakeCiAdmin extends BaseCommand
         $controllerPath = APPPATH . "Controllers/{$className}.php";
 
         if (($force === false) && file_exists($controllerPath)) {
-            CLI::write("Controlador ya existe: {$className}.php", 'orange');
+            CLI::write("-> Controlador ya existe: {$className}.php", 'orange');
             return;
         }
 
@@ -110,9 +110,9 @@ class MakeCiAdmin extends BaseCommand
         write_file($controllerPath, $code);
 
         if ($force && file_exists($controllerPath)) {
-            CLI::write("Controlador sobrescrito: {$className}.php", 'light_blue');
+            CLI::write("-> Controlador sobrescrito: {$className}.php", 'light_blue');
         } else {
-            CLI::write("Controlador creado: {$className}.php", 'green');
+            CLI::write("-> Controlador creado: {$className}.php", 'green');
             $this->controllersCreated++;
         }
     }
@@ -120,7 +120,7 @@ class MakeCiAdmin extends BaseCommand
     protected function generateViews(string $className, string $table, bool $force = false)
     {
         if (in_array(strtolower($table), $this->reservedViewFolders)) {
-            CLI::error("No se pueden generar vistas para la tabla reservada: {$table}");
+            CLI::error("-> No se pueden generar vistas para la tabla reservada: {$table}");
             return;
         }
 
@@ -134,7 +134,7 @@ class MakeCiAdmin extends BaseCommand
         // Index view
         $indexViewPath = "{$viewDir}/index.php";
         if (($force === false) && file_exists($indexViewPath)) {
-            CLI::write("Vista index ya existe: {$table}/index.php", 'orange');
+            CLI::write("-> Vista index ya existe: {$table}/index.php", 'orange');
         } else {
             list($thead, $tbody) = $this->generateTableFields($fields);
 
@@ -144,14 +144,14 @@ class MakeCiAdmin extends BaseCommand
                 'tbody' => $tbody,
             ]);
             write_file($indexViewPath, $html);
-            CLI::write("Vista index generada: {$table}/index.php", $force ? 'light_blue' : 'green');
+            CLI::write("-> Vista index generada: {$table}/index.php", $force ? 'light_blue' : 'green');
             $this->viewsCreated++;
         }
 
         // Create view
         $createViewPath = "{$viewDir}/create.php";
         if (($force === false) && file_exists($createViewPath)) {
-            CLI::write("Vista create ya existe: {$table}/create.php", 'orange');
+            CLI::write("-> Vista create ya existe: {$table}/create.php", 'orange');
         } else {
             $formFields = $this->generateFormFields($fields, 'post');
             $html = $this->renderTemplate("view_create", [
@@ -159,14 +159,14 @@ class MakeCiAdmin extends BaseCommand
                 'formFields' => $formFields,
             ]);
             write_file($createViewPath, $html);
-            CLI::write("Vista create generada: {$table}/create.php", $force ? 'light_blue' : 'green');
+            CLI::write("-> Vista create generada: {$table}/create.php", $force ? 'light_blue' : 'green');
             $this->viewsCreated++;
         }
 
         // Edit view
         $editViewPath = "{$viewDir}/edit.php";
         if (($force === false) && file_exists($editViewPath)) {
-            CLI::write("Vista edit ya existe: {$table}/edit.php", 'orange');
+            CLI::write("-> Vista edit ya existe: {$table}/edit.php", 'orange');
         } else {
             $formFields = $this->generateFormFields($fields, 'row');
             $html = $this->renderTemplate("view_edit", [
@@ -174,7 +174,7 @@ class MakeCiAdmin extends BaseCommand
                 'formFields' => $formFields,
             ]);
             write_file($editViewPath, $html);
-            CLI::write("Vista edit generada: {$table}/edit.php", $force ? 'light_blue' : 'green');
+            CLI::write("-> Vista edit generada: {$table}/edit.php", $force ? 'light_blue' : 'green');
             $this->viewsCreated++;
         }
     }
@@ -183,11 +183,11 @@ class MakeCiAdmin extends BaseCommand
     {
         $controllerPath = APPPATH . "Controllers/Dashboard.php";
         if (($force === false) && file_exists($controllerPath)) {
-            CLI::write("Dashboard.php ya existe, no se sobrescribe.", 'orange');
+            CLI::write("-> Dashboard.php ya existe, no se sobrescribe.", 'orange');
         } else {
             $template = $this->renderTemplate('dashboard_controller', []);
             write_file($controllerPath, $template);
-            CLI::write("Controlador Dashboard generado: Dashboard.php", $force ? 'light_blue' : 'green');
+            CLI::write("-> Controlador Dashboard generado: Dashboard.php", $force ? 'light_blue' : 'green');
             $this->controllersCreated++;
         }
 
@@ -199,10 +199,10 @@ class MakeCiAdmin extends BaseCommand
         } else {
             if (file_exists($templatePath)) {
                 copy($templatePath, $viewPath);
-                CLI::write("Vista dashboard generada: dashboard.php", $force ? 'light_blue' : 'green');
+                CLI::write("-> Vista dashboard generada: dashboard.php", $force ? 'light_blue' : 'green');
                 $this->viewsCreated++;
             } else {
-                CLI::error("No se encontró el template dashboard_view.php para el Dashboard.");
+                CLI::error("-> No se encontró el template dashboard_view.php para el Dashboard.");
             }
         }
 
@@ -217,11 +217,11 @@ class MakeCiAdmin extends BaseCommand
                 $routesContents
             );
             file_put_contents($routesFile, $routesContents);
-            CLI::write("Ruta '/' actualizada para usar Dashboard::index.", 'green');
+            CLI::write("* Ruta '/' actualizada para usar Dashboard::index.", 'green');
         } else {
-            $newRoute = "\n// Ruta principal generada automáticamente\n\$routes->get('/', 'Dashboard::index');\n";
+            $newRoute = "\n//* Ruta principal generada automáticamente\n\$routes->get('/', 'Dashboard::index');\n";
             file_put_contents($routesFile, $newRoute, FILE_APPEND);
-            CLI::write("Ruta '/' creada para usar Dashboard::index.", 'green');
+            CLI::write("* Ruta '/' creada para usar Dashboard::index.", 'green');
         }
     }
     
@@ -247,9 +247,9 @@ class MakeCiAdmin extends BaseCommand
 
         if (strpos($routesContents, "\$routes->get('{$table}'") === false) {
             file_put_contents($routesFile, $newRoutes, FILE_APPEND);
-            CLI::write("Rutas agregadas para: {$className}", 'green');
+            CLI::write("-> Rutas agregadas para: {$className}", 'green');
         } else {
-            CLI::write("Las rutas para {$className} ya existen en Routes.php", 'orange');
+            CLI::write("-> Las rutas para {$className} ya existen en Routes.php", 'orange');
         }
     }
     

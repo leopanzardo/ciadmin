@@ -86,6 +86,59 @@ Configurá tu conexión como en cualquier proyecto de CodeIgniter 4, ya sea:
 
 <br/>
 
+### 🛠️ Configuración del Servidor
+
+Asegurate de configurar los siguientes parámetros en app/Config/App.php:
+
+```
+public string $baseURL = 'http://tu-dominio.local/'; // O localhost si usás php spark serve
+public array $allowedHostnames = ['tu-dominio.local']; // Igual que baseURL, sin la barra final
+public string $indexPage = ''; // Dejar vacío para eliminar index.php de las URLs
+```
+<br/><br/>
+
+---
+
+<br/>
+
+### 🛠️ .htaccess
+
+Ya se incluye un archivo .htaccess funcional en la carpeta /public.
+No hace falta modificarlo salvo que tengas configuraciones especiales.
+
+Importante: Asegurate de que el módulo mod_rewrite esté habilitado en Apache.
+<br/><br/>
+
+---
+
+<br/>
+
+### 🛠️ Virtual Host (si usás Apache)
+
+Si preferís usar un servidor virtual en Apache (por ejemplo con WampServer o XAMPP), creá una entrada en tu httpd-vhosts.conf como esta:
+
+```
+<VirtualHost *:80>
+    ServerName tu-dominio.local
+    DocumentRoot "C:/Proyectos/MiProyecto/public"
+    <Directory "C:/Proyectos/MiProyecto/public/">
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+```
+
+Luego recordá agregar el dominio en tu archivo hosts, por ejemplo:
+
+```
+127.0.0.1   tu-dominio.local
+```
+<br/><br/>
+
+---
+
+<br/>
+
 ### ⚙️ Uso
 
 Para generar toda la estructura administrativa basada en tu base de datos ejecutá:
@@ -101,12 +154,53 @@ Esto generará automáticamente:
 - Vistas básicas (index, create, edit)
 - Rutas
 - Un Dashboard de inicio con enlaces a cada módulo generado
+<br/><br/>
 
-Para probar la aplicación generada tienes dos opciones:
+---
 
-1. Si utilizas Wampserver, XAMPP o tienes algún servidor local instalado como IIS, Apache, Nginx o algún otro, configura un servidor virtual que apunte a la carpeta public que se encuentra en la carpeta donde clonaste el repositorio. Una vez configurado y reiniciado el servidor en caso de ser necesario, puedes acceder a la aplicación navegando a la url que configuraste.
+<br/>
 
-2. En una terminal ubicado en la carpeta del repositorio ejecuta el siguiente comando:
+### Opciones disponibles
+
+- --force (-f) ➔ Fuerza la sobreescritura de archivos existentes.
+
+- --only=model, --only=controller, --only=view, --only=routes, --only=dashboard ➔ Permite generar solo el tipo de archivo que necesites.
+<br/><br/>
+
+---
+
+<br/>
+
+### Ejemplos
+
+Forzar regenerar todo:
+
+```
+php spark make:ciadmin --force
+```
+
+Regenerar únicamente las vistas:
+
+```
+php spark make:ciadmin --only=view --force
+```
+<br/><br/>
+
+---
+
+<br/>
+
+### 🧪 Probar la aplicación
+
+Podés probar la aplicación de dos maneras:
+
+1. Usando Virtual Hosts (Apache, Nginx, IIS, etc.)
+
+  - Accedé directamente al dominio configurado (http://tu-dominio.local/).
+
+2. Usando el servidor embebido de CodeIgniter
+
+Ejecutá:
 
 ```
 php spark serve
