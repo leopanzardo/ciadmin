@@ -119,7 +119,7 @@ Luego recordá agregar el dominio en tu archivo hosts, por ejemplo:
 
 ### ⚙️ Uso
 
-Para generar toda la estructura administrativa basada en tu base de datos ejecutá:
+Una vez que ya tenés todo tu proyecto correctamente configurado, especialmente la configuración de la base de datos, lo único que necesitas hacer para generar una aplicación básica, que te permita administrar precisamente esa base de datos es ejecutar en una terminal el siguiente comando:
 
 ```
 php spark make:ciadmin
@@ -138,9 +138,13 @@ Esto generará automáticamente:
 
 ### Opciones disponibles
 
-- --force (-f) ➔ Fuerza la sobreescritura de archivos existentes.
+- --appname (-a) ➔ Te permite definir el nombre de la aplicación que se mostrará en el encabezado y como título de la página.
 
-- --only=model, --only=controller, --only=view, --only=routes, --only=dashboard ➔ Permite generar solo el tipo de archivo que necesites.
+- --force (-f) ➔ Fuerza la sobreescritura de archivos existentes, ideal si ya habías generado la aplicación pero necesitas actualizarla rápidamente.
+
+- --only (-o) ➔ Permite generar solo el tipo de archivo que necesites. Opciones disponibles: --only model, --only controller, --only view, --only routes, --only dashboard
+
+⚠️ **Importante**: Al utilizar opciones como --appname, recordá escribirlas separadas por espacios. No uses el símbolo = como en --appname="Mi App", ya que CodeIgniter no parsea esa sintaxis. Usá en cambio --appname "Mi App".
 <br/><br/>
 
 ---
@@ -156,7 +160,7 @@ php spark make:ciadmin --force
 Regenerar únicamente las vistas:
 
 ```
-php spark make:ciadmin --only=view --force
+php spark make:ciadmin --only view --force
 ```
 
 ---

@@ -9,11 +9,11 @@
         <table class="table table-striped table-bordered">
             <thead class="table-dark">
                 <tr>
-                    {{thead}}
+{{thead}}
                 </tr>
             </thead>
             <tbody>
-                {{tbody}}
+{{tbody}}
             </tbody>
         </table>
     </div>
