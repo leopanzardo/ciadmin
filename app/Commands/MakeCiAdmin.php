@@ -425,10 +425,10 @@ class MakeCiAdmin extends BaseCommand
         $tbody .= "            <?php foreach (\$rows as \$row): ?>\n";
         $tbody .= "            <tr>\n";
         $tbody .= "                <td>\n";
-        $tbody .= "                    <a href=\"<?= site_url(\$viewFolder . '/edit/' . \$row['id']) ?>\" class=\"btn btn-sm btn-outline-primary me-1\" title=\"Editar\">\n";
+        $tbody .= "                    <a href=\"<?= site_url('{$viewFolder}/edit/' . \$row['id']) ?>\" class=\"btn btn-sm btn-outline-primary me-1\" title=\"Editar\">\n";
         $tbody .= "                        <i class=\"bi bi-pencil\"></i>\n";
         $tbody .= "                    </a>\n";
-        $tbody .= "                    <a href=\"<?= site_url(\$viewFolder . '/delete/' . \$row['id']) ?>\" class=\"btn btn-sm btn-outline-danger\" title=\"Eliminar\" onclick=\"return confirm('¿Seguro que desea eliminar este registro?')\">\n";
+        $tbody .= "                    <a href=\"<?= site_url('{$viewFolder}/delete/' . \$row['id']) ?>\" class=\"btn btn-sm btn-outline-danger\" title=\"Eliminar\" onclick=\"return confirm('¿Seguro que desea eliminar este registro?')\">\n";
         $tbody .= "                        <i class=\"bi bi-trash\"></i>\n";
         $tbody .= "                    </a>\n";
         $tbody .= "                </td>\n";
