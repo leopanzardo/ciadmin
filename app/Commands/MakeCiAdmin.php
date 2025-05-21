@@ -163,7 +163,7 @@ class MakeCiAdmin extends BaseCommand
         if (($force === false) && file_exists($indexViewPath)) {
             CLI::write("-> Vista index ya existe: {$table}/index.php", 'orange');
         } else {
-            list($thead, $tbody) = $this->generateTableFields($fields);
+            list($thead, $tbody) = $this->generateTableFields($fields, $table);
 
             $html = $this->renderTemplate("view_index", [
                 'viewFolder' => $table,
@@ -412,31 +412,26 @@ class MakeCiAdmin extends BaseCommand
         return $rulesString;
     }
     
-    protected function generateTableFields(array $fields): array
+    protected function generateTableFields(array $fields, string $viewFolder): array
     {
         // Encabezados de la tabla
-        $thead = "                <th>Acciones</th>\n";
+        $thead = "";
         foreach ($fields as $field) {
             $thead .= "                <th>" . ucfirst(str_replace('_', ' ', $field['name'])) . "</th>\n";
         }
+        $thead .= "                <th>Acciones</th>\n";
 
         // Filas de la tabla
         $tbody = "";
         $tbody .= "            <?php foreach (\$rows as \$row): ?>\n";
         $tbody .= "            <tr>\n";
-        $tbody .= "                <td>\n";
-        $tbody .= "                    <a href=\"<?= site_url(\$viewFolder . '/edit/' . \$row['id']) ?>\" class=\"btn btn-sm btn-outline-primary me-1\" title=\"Editar\">\n";
-        $tbody .= "                        <i class=\"bi bi-pencil\"></i>\n";
-        $tbody .= "                    </a>\n";
-        $tbody .= "                    <a href=\"<?= site_url(\$viewFolder . '/delete/' . \$row['id']) ?>\" class=\"btn btn-sm btn-outline-danger\" title=\"Eliminar\" onclick=\"return confirm('¿Seguro que desea eliminar este registro?')\">\n";
-        $tbody .= "                        <i class=\"bi bi-trash\"></i>\n";
-        $tbody .= "                    </a>\n";
-        $tbody .= "                </td>\n";
-
         foreach ($fields as $field) {
             $tbody .= "                <td><?= \$row['{$field['name']}'] ?? '' ?></td>\n";
         }
-
+        $tbody .= "                <td>\n";
+        $tbody .= "                    <a href=\"<?= site_url('<?= \$viewFolder ?>/edit/' . \$row['id']) ?>\" class=\"btn btn-sm btn-primary\">Editar</a>\n";
+        $tbody .= "                    <a href=\"<?= site_url('<?= \$viewFolder ?>/delete/' . \$row['id']) ?>\" class=\"btn btn-sm btn-danger\" onclick=\"return confirm('¿Seguro que desea eliminar este registro?')\">Eliminar</a>\n";
+        $tbody .= "                </td>\n";
         $tbody .= "            </tr>\n";
         $tbody .= "            <?php endforeach; ?>\n";
 
