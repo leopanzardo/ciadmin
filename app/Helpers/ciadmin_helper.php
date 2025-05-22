@@ -3,27 +3,9 @@
 if (!function_exists('renderCiAdminView')) {
     function renderCiAdminView(string $contentView, array $data = []): string
     {
-        $html = '';
-
-        // Renderizar header
-        $headerPath = APPPATH . 'Views/ciadmin/header.php';
-        if (file_exists($headerPath)) {
-            $html .= parseTemplate(file_get_contents($headerPath), $data);
-        }
-
-        // Renderizar contenido
-        $contentPath = APPPATH . "Views/{$contentView}.php";
-        if (file_exists($contentPath)) {
-            // El contenido central (create, edit, index, etc.) se asume como PHP real
-            $html .= view($contentView, $data);
-        }
-
-        // Renderizar footer
-        $footerPath = APPPATH . 'Views/ciadmin/footer.php';
-        if (file_exists($footerPath)) {
-            $html .= parseTemplate(file_get_contents($footerPath), $data);
-        }
-
+        $html = view('ciadmin/header', $data);
+        $html .= view($contentView, $data);
+        $html .= view('ciadmin/footer', $data);
         return $html;
     }
 }

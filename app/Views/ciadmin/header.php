@@ -11,7 +11,7 @@
 		
 		<?= displayFlashes() ?>
 
-		<nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+		<nav class="navbar navbar-expand-lg navbar-light bg-info mb-4">
 			<div class="container-fluid">
 				<a class="navbar-brand" href="/"><?= CIADMIN_APPNAME ?></a>
 			</div>

@@ -10,116 +10,27 @@
 
 **CIAdmin** es una herramienta para generar automáticamente una aplicación administrativa basada en una base de datos utilizando [CodeIgniter 4](https://codeigniter.com/).
 
-Su objetivo es simplificar la creación de sistemas CRUD monolíticos con mínimo esfuerzo, manteniendo el código generado limpio y fácil de extender.  
-Es un excelente punto de partida para cualquier aplicación que requiera administrar bases de datos.
+Su objetivo es simplificar la creación de sistemas CRUD monolíticos con el menor esfuerzo posible, manteniendo el código generado limpio y fácil de extender.  
+La idea es que funcione como punto de partida para cualquier aplicación que requiera administrar bases de datos.
 <br/><br/>
 
 ---
 
-## 🚀 Instalación
+## 🚀 Instalación y configuración
 
-### 🖥️ Crear el proyecto
+Este proyecto utiliza CodeIgniter 4, por lo que el proceso de instalación y configuración es el mismo que en cualquier aplicación basada en este framework.
 
-Abrí una terminal y ejecutá:
+📌 La diferencia es que debés **clonar este repositorio** o descargarlo, ya que contiene la versión ajustada de CodeIgniter y todo el sistema de generación automática.
 
-```
-mkdir MiProyecto
-cd MiProyecto
-```
+> Para más detalles sobre la instalación y configuración general, consultá la [documentación oficial de CodeIgniter](https://www.codeigniter.com/user_guide/index.html).
 
----
-
-### 🧩 Clonar el repositorio
-
-Ahora tenés dos opciones:
-
-1. Clonar en una subcarpeta llamada ciadmin (opción por defecto)
-
-```
-git clone https://github.com/leopanzardo/ciadmin.git
-```
-
-Esto creará una carpeta ciadmin dentro de MiProyecto.
-
-2. Clonar directamente en la carpeta actual
-
-```
-git clone https://github.com/leopanzardo/ciadmin.git .
-```
-
-(Importante: el . al final indica que se clone directamente en la carpeta actual.)
-<br/><br/>
+**⚠️ Lo más importante:** asegurate de configurar correctamente la conexión a la base de datos, ya que CIAdmin utilizará estos datos para generar todos los componentes.
 
 ---
 
-### ⚙️ Instalar dependencias
+## ⚙️ Uso
 
-Una vez clonado el proyecto y ubicado en la carpeta en que lo clonaste, instalá las dependencias de Composer:
-
-```
-composer install
-```
-
----
-
-### 🛠️ Configurar la conexión a la base de datos
-
-Configurá tu conexión como en cualquier proyecto de CodeIgniter 4, ya sea:
-
-- Editando el archivo .env, o
-- Modificando app/Config/Database.php.
-<br/><br/>
-
----
-
-### 🛠️ Configuración del Servidor
-
-Asegurate de configurar los siguientes parámetros en app/Config/App.php:
-
-```
-public string $baseURL = 'http://tu-dominio.local/'; // O localhost si usás php spark serve
-public array $allowedHostnames = ['tu-dominio.local']; // Igual que baseURL, sin la barra final
-public string $indexPage = ''; // Dejar vacío para eliminar index.php de las URLs
-```
-
----
-
-### 🛠️ .htaccess
-
-Ya se incluye un archivo .htaccess funcional en la carpeta /public.
-No hace falta modificarlo salvo que tengas configuraciones especiales.
-
-Importante: Asegurate de que el módulo mod_rewrite esté habilitado en Apache.
-<br/><br/>
-
----
-
-### 🛠️ Virtual Host (si usás Apache)
-
-Si preferís usar un servidor virtual en Apache (por ejemplo con WampServer o XAMPP), creá una entrada en tu httpd-vhosts.conf como esta:
-
-```
-<VirtualHost *:80>
-    ServerName tu-dominio.local
-    DocumentRoot "C:/Proyectos/MiProyecto/public"
-    <Directory "C:/Proyectos/MiProyecto/public/">
-        AllowOverride All
-        Require all granted
-    </Directory>
-</VirtualHost>
-```
-
-Luego recordá agregar el dominio en tu archivo hosts, por ejemplo:
-
-```
-127.0.0.1   tu-dominio.local
-```
-
----
-
-### ⚙️ Uso
-
-Una vez que ya tenés todo tu proyecto correctamente configurado, especialmente la configuración de la base de datos, lo único que necesitas hacer para generar una aplicación básica, que te permita administrar precisamente esa base de datos es ejecutar en una terminal el siguiente comando:
+Una vez que tu proyecto esté correctamente configurado, ejecutá el siguiente comando en una terminal desde la raíz del proyecto:
 
 ```
 php spark make:ciadmin
@@ -128,8 +39,8 @@ php spark make:ciadmin
 Esto generará automáticamente:
 
 - Modelos
-- Controladores
 - Vistas básicas (index, create, edit)
+- Controladores
 - Rutas
 - Un Dashboard de inicio con enlaces a cada módulo generado
 <br/><br/>
@@ -138,11 +49,21 @@ Esto generará automáticamente:
 
 ### Opciones disponibles
 
-- --appname (-a) ➔ Te permite definir el nombre de la aplicación que se mostrará en el encabezado y como título de la página.
+- --appname / -a
+  Define el nombre de la aplicación (usado en el título y navbar).
+  Ejemplo: --appname "Mi Aplicación"
 
-- --force (-f) ➔ Fuerza la sobreescritura de archivos existentes, ideal si ya habías generado la aplicación pero necesitas actualizarla rápidamente.
+- --force / -f
+  Fuerza la sobreescritura de archivos ya existentes. Ideal para actualizar.
 
-- --only (-o) ➔ Permite generar solo el tipo de archivo que necesites. Opciones disponibles: --only model, --only controller, --only view, --only routes, --only dashboard
+- --only / -o
+  Genera solo un tipo de componente. Valores posibles:
+    model, controller, view, routes, dashboard
+  Ejemplo: --only view
+
+- --table / -t
+  Especifica una o más tablas (separadas por coma) para generar sus componentes.
+  Ejemplo: --table users,posts
 
 ⚠️ **Importante**: Al utilizar opciones como --appname, recordá escribirlas separadas por espacios. No uses el símbolo = como en --appname="Mi App", ya que CodeIgniter no parsea esa sintaxis. Usá en cambio --appname "Mi App".
 <br/><br/>
@@ -151,42 +72,49 @@ Esto generará automáticamente:
 
 ### Ejemplos
 
-Forzar regenerar todo:
+Regenerar todo el sistema, sobrescribiendo lo existente:
 
 ```
 php spark make:ciadmin --force
 ```
 
-Regenerar únicamente las vistas:
+Regenerar solo las vistas:
 
 ```
 php spark make:ciadmin --only view --force
+```
+
+Generar solo el modelo y controlador para la tabla clients:
+
+```
+php spark make:ciadmin --only model --table clients
+php spark make:ciadmin --only controller --table clients
 ```
 
 ---
 
 ### 🧪 Probar la aplicación
 
-Podés probar la aplicación de dos maneras:
+Podés ejecutar la aplicación con:
 
-1. Usando Virtual Hosts (Apache, Nginx, IIS, etc.)
+1. Servidor embebido de CodeIgniter
 
-  - Accedé directamente al dominio configurado (http://tu-dominio.local/).
+  Ejecutá:
 
-2. Usando el servidor embebido de CodeIgniter
+  ```
+  php spark serve
+  ```
 
-Ejecutá:
+  Luego accedé a http://localhost:8080/ en tu navegador.
 
-```
-php spark serve
-```
+2. Servidor web local (Apache, Nginx, IIS, etc.):
 
-Eso lanzará el servidor de desarrollo incluído en CodeIgniter y podrás acceder a tu aplicación accediendo a http://localhost:8080/ en tu navegador.
+  - Configurá un virtual host que apunte a la carpeta /public.
 <br/><br/>
 
 ---
 
-### 📋 Requisitos
+## 📋 Requisitos
 
 Se recomienda cumplir con los requisitos mínimos de CodeIgniter 4:
 
@@ -195,7 +123,6 @@ Se recomienda cumplir con los requisitos mínimos de CodeIgniter 4:
 - MySQL o compatible
 - Servidor Web (Apache, Nginx, etc.)
 
-Para mayor información sobre los requerimientos te sugiero que consultes la [documentación de CodeIniter](https://www.codeigniter.com/user_guide/intro/requirements.html) al respecto.
 <br/><br/>
 
 ---
@@ -209,7 +136,7 @@ Para mayor información sobre los requerimientos te sugiero que consultes la [do
 
 ---
 
-### 📚 Créditos
+## 📚 Créditos
 
 Creado con ❤️ por Leonardo Panzardo.
 

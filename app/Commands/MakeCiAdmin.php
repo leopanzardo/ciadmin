@@ -21,6 +21,8 @@ class MakeCiAdmin extends BaseCommand
         '-o'      => 'Alias de --only.',
         '--appname' => 'Nombre de la aplicación a usar en el dashboard y el header.',
         '-a'       => 'Alias de --appname.',
+        '--table' => 'Nombre de tabla o tablas (separados por coma) para las cuales generar los componentes.',
+        '-t'      => 'Alias de --table.',
     ];
 
     protected array $reservedViewFolders = ['ciadmin', 'shared', 'system'];
