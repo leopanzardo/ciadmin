@@ -355,12 +355,14 @@ class MakeCiAdmin extends BaseCommand
 
         $fields = [];
         foreach ($fieldsData as $field) {
+            $isInteger = in_array(strtolower($field->type), ['int', 'bigint', 'smallint', 'mediumint', 'tinyint']);
+            $isPrimaryKey = property_exists($field, 'primary_key') && $field->primary_key;
             $fields[] = [
                 'name'            => $field->name,
                 'type'            => strtolower($field->type),
                 'max_length'      => property_exists($field, 'max_length') ? $field->max_length : null,
-                'primary_key'     => property_exists($field, 'primary_key') ? $field->primary_key : false,
-                'auto_increment'  => property_exists($field, 'auto_increment') ? $field->auto_increment : false,
+                'primary_key'     => $isPrimaryKey,
+                'auto_increment'  => $isPrimaryKey && $isInteger,
                 'not_null'        => property_exists($field, 'nullable') ? !$field->nullable : false,
             ];
         }
