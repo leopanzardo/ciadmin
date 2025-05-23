@@ -487,7 +487,7 @@ class MakeCiAdmin extends BaseCommand
         // Encabezados de la tabla
         $thead = "                <th>Acciones</th>\n";
         foreach ($fields as $field) {
-            if (!empty($field['auto_increment']) || in_array($name, $excludedFields, true)) {
+            if (!empty($field['auto_increment']) || in_array($field['name'], $excludedFields, true)) {
                 continue;
             }
             $thead .= "                <th>" . ucfirst(str_replace('_', ' ', $field['name'])) . "</th>\n";
@@ -509,7 +509,7 @@ class MakeCiAdmin extends BaseCommand
         $tbody .= "                </td>\n";
 
         foreach ($fields as $field) {
-            if (!empty($field['auto_increment']) || in_array($name, $excludedFields, true)) {
+            if (!empty($field['auto_increment']) || in_array($field['name'], $excludedFields, true)) {
                 continue;
             }
             $tbody .= "                <td><?= \$row['{$field['name']}'] ?? '' ?></td>\n";
