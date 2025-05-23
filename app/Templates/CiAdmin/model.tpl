@@ -7,13 +7,13 @@ use CodeIgniter\Model;
 class {{modelName}} extends Model
 {
     protected $table      = '{{tableName}}';
-    protected $primaryKey = 'id';
-    protected $returnType     = 'array';
-    protected $useSoftDeletes = false;
+    protected $primaryKey = '{{primaryKey}}';
+    protected $useAutoIncrement = {{useAutoIncrement}};
+    protected $returnType     = '{{returnType}}';
+    protected $useSoftDeletes = {{useSoftDeletes}};
 
-    protected $allowedFields = [];
+    protected $allowedFields = [{{allowedFields}}];
 
-    protected $useTimestamps = true;
-    protected $createdField  = 'created_at';
-    protected $updatedField  = 'updated_at';
+    protected $useTimestamps = {{useTimestamps}};
+{{createdFieldLine}}{{updatedFieldLine}}
 }

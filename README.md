@@ -12,7 +12,6 @@
 
 Su objetivo es simplificar la creación de sistemas CRUD monolíticos con el menor esfuerzo posible, manteniendo el código generado limpio y fácil de extender.  
 La idea es que funcione como punto de partida para cualquier aplicación que requiera administrar bases de datos.
-<br/><br/>
 
 ---
 
@@ -43,7 +42,6 @@ Esto generará automáticamente:
 - Controladores
 - Rutas
 - Un Dashboard de inicio con enlaces a cada módulo generado
-<br/><br/>
 
 ---
 
@@ -66,7 +64,6 @@ Esto generará automáticamente:
   Ejemplo: --table users,posts
 
 ⚠️ **Importante**: Al utilizar opciones como --appname, recordá escribirlas separadas por espacios. No uses el símbolo = como en --appname="Mi App", ya que CodeIgniter no parsea esa sintaxis. Usá en cambio --appname "Mi App".
-<br/><br/>
 
 ---
 
@@ -110,7 +107,6 @@ Podés ejecutar la aplicación con:
 2. Servidor web local (Apache, Nginx, IIS, etc.):
 
   - Configurá un virtual host que apunte a la carpeta /public.
-<br/><br/>
 
 ---
 
@@ -123,8 +119,6 @@ Se recomienda cumplir con los requisitos mínimos de CodeIgniter 4:
 - MySQL o compatible
 - Servidor Web (Apache, Nginx, etc.)
 
-<br/><br/>
-
 ---
 
 ## 👥 Autores
@@ -132,7 +126,6 @@ Se recomienda cumplir con los requisitos mínimos de CodeIgniter 4:
 - **Leonardo Panzardo**
   - [GitHub](https://github.com/leopanzardo)
   - [LinkedIn](https://www.linkedin.com/in/leopanzardo/)
-<br/><br/>
 
 ---
 

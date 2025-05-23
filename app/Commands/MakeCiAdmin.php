@@ -103,9 +103,58 @@ class MakeCiAdmin extends BaseCommand
             return;
         }
 
+        $fields = $this->getTableFields($table);
+
+        $primaryKey = 'id';
+        $useAutoIncrement = false;
+        $useSoftDeletes = false;
+        $useTimestamps = false;
+        $createdField = '';
+        $updatedField = '';
+        $deletedField = '';
+        $allowedFields = [];
+
+        foreach ($fields as $field) {
+            $name = $field['name'];
+
+            if ($field['primary_key']) {
+                $primaryKey = $name;
+                $useAutoIncrement = $field['auto_increment'] ?? false;
+                continue;
+            }
+
+            if ($name === 'deleted_at') {
+                $useSoftDeletes = true;
+                $deletedField = 'deleted_at';
+                continue;
+            }
+
+            if ($name === 'created_at') {
+                $useTimestamps = true;
+                $createdField = 'created_at';
+                continue;
+            }
+
+            if ($name === 'updated_at') {
+                $useTimestamps = true;
+                $updatedField = 'updated_at';
+                continue;
+            }
+
+            $allowedFields[] = "'$name'";
+        }
+
         $code = $this->renderTemplate('model', [
-            'modelName' => $className . 'Model',
-            'tableName' => $table
+            'modelName'       => $className . 'Model',
+            'tableName'       => $table,
+            'primaryKey'      => $primaryKey,
+            'useAutoIncrement'=> $useAutoIncrement ? 'true' : 'false',
+            'returnType'      => 'array',
+            'useSoftDeletes'  => $useSoftDeletes ? 'true' : 'false',
+            'allowedFields'   => implode(', ', $allowedFields),
+            'useTimestamps'   => $useTimestamps ? 'true' : 'false',
+            'createdFieldLine' => $createdField ? "    protected \$createdField  = '{$createdField}';\n" : '',
+            'updatedFieldLine' => $updatedField ? "    protected \$updatedField  = '{$updatedField}';\n" : '',
         ]);
 
         write_file($modelPath, $code);
@@ -306,14 +355,13 @@ class MakeCiAdmin extends BaseCommand
 
         $fields = [];
         foreach ($fieldsData as $field) {
-            if (in_array($field->name, ['id', 'created_at', 'updated_at'])) {
-                continue;
-            }
-
             $fields[] = [
-                'name'       => $field->name,
-                'type'       => strtolower($field->type),
-                'max_length' => property_exists($field, 'max_length') ? $field->max_length : null,
+                'name'            => $field->name,
+                'type'            => strtolower($field->type),
+                'max_length'      => property_exists($field, 'max_length') ? $field->max_length : null,
+                'primary_key'     => property_exists($field, 'primary_key') ? $field->primary_key : false,
+                'auto_increment'  => property_exists($field, 'auto_increment') ? $field->auto_increment : false,
+                'not_null'        => property_exists($field, 'nullable') ? !$field->nullable : false,
             ];
         }
 
@@ -323,9 +371,16 @@ class MakeCiAdmin extends BaseCommand
     protected function generateFormFields(array $fields, string $source = 'post'): string
     {
         $html = "";
+        $excludedFields = ['created_at', 'updated_at', 'deleted_at'];
 
         foreach ($fields as $field) {
             $fieldName = $field['name'];
+
+            // Saltar si es autoincremental o si está en la lista de campos excluidos
+            if (!empty($field['auto_increment']) || in_array($fieldName, $excludedFields, true)) {
+                continue;
+            }
+
             $fieldType = strtolower($field['type']);
             $label = ucfirst(str_replace('_', ' ', $fieldName));
 
@@ -344,19 +399,23 @@ class MakeCiAdmin extends BaseCommand
             }
 
             // Determinar valor
-            if ($source === 'post') {
-                $value = '<?= old(\'' . $fieldName . '\') ?>';
-            } else {
-                $value = '<?= old(\'' . $fieldName . '\', $row[\'' . $fieldName . '\'] ?? \'\') ?>';
-            }
+            $value = $source === 'post'
+                ? '<?= old(\'' . $fieldName . '\') ?>'
+                : '<?= old(\'' . $fieldName . '\', $row[\'' . $fieldName . '\'] ?? \'\') ?>';
+
+            $isRequired = !empty($field['not_null']);
+            $requiredAttr = $isRequired ? 'required' : '';
+            $feedback = $isRequired
+                ? "<div class=\"invalid-feedback\">\n            Por favor, completá el campo {$label}.\n        </div>"
+                : '';
 
             $html .= <<<EOT
-    <div class="mb-3 col-md-6">
-        <label for="{$fieldName}" class="form-label">{$label}</label>
-        <input type="{$inputType}" class="form-control" id="{$fieldName}" name="{$fieldName}" value="{$value}">
-    </div>
-
-    EOT;
+                <div class="mb-3 col-md-6">
+                    <label for="{$fieldName}" class="form-label">{$label}</label>
+                    <input type="{$inputType}" class="form-control" id="{$fieldName}" name="{$fieldName}" value="{$value}" {$requiredAttr}>
+                    {$feedback}
+                </div>
+            EOT;
         }
 
         return $html;
@@ -366,20 +425,24 @@ class MakeCiAdmin extends BaseCommand
     {
         $rules = [];
 
+        // Campos que no requieren validación
+        $excludedFields = ['created_at', 'updated_at', 'deleted_at'];
+
         foreach ($fields as $field) {
             $name = $field['name'];
             $type = strtolower($field['type']);
             $maxLength = $field['max_length'] ?? null;
 
-            $rule = [];
-
-            // No validamos campos opcionales tipo timestamps
-            if (in_array($name, ['created_at', 'updated_at'])) {
+            // Excluir campos innecesarios
+            if (!empty($field['auto_increment']) || in_array($name, $excludedFields, true)) {
                 continue;
             }
 
-            // Siempre pedimos que los campos sean requeridos (puede mejorarse más adelante)
-            $rule[] = 'required';
+            $rule = [];
+
+            if (!empty($field['not_null'])) {
+                $rule[] = 'required';
+            }
 
             // Tipos especiales
             if (str_contains($name, 'email')) {
@@ -390,13 +453,13 @@ class MakeCiAdmin extends BaseCommand
                 $rule[] = 'integer';
             } elseif (in_array($type, ['decimal', 'float', 'double'])) {
                 $rule[] = 'decimal';
-            } elseif (in_array($type, ['date'])) {
+            } elseif ($type === 'date') {
                 $rule[] = 'valid_date';
             } elseif (in_array($type, ['datetime', 'timestamp'])) {
-                // Opcionalmente podríamos validar formato datetime aquí
+                // Aquí podrías agregar validación de formato si lo necesitás
             }
 
-            // Si sabemos el largo máximo
+            // Validar largo máximo si está disponible
             if ($maxLength && is_numeric($maxLength) && $maxLength > 0) {
                 $rule[] = "max_length[{$maxLength}]";
             }
