@@ -484,6 +484,7 @@ class MakeCiAdmin extends BaseCommand
         // Encabezados de la tabla
         $thead = "                <th>Acciones</th>\n";
         foreach ($fields as $field) {
+            if (!empty($field['auto_increment'])) continue;
             $thead .= "                <th>" . ucfirst(str_replace('_', ' ', $field['name'])) . "</th>\n";
         }
 
@@ -492,15 +493,16 @@ class MakeCiAdmin extends BaseCommand
         $tbody .= "            <?php foreach (\$rows as \$row): ?>\n";
         $tbody .= "            <tr>\n";
         $tbody .= "                <td>\n";
-        $tbody .= "                    <a href=\"<?= site_url('{$viewFolder}/edit/' . \$row['id']) ?>\" class=\"btn btn-sm btn-outline-primary me-1\" title=\"Editar\">\n";
+        $tbody .= "                    <a href=\"<?= site_url('{$viewFolder}/edit/' . \$row['id']) ?>\" class=\"btn btn-sm btn-primary me-1\" title=\"Editar\">\n";
         $tbody .= "                        <i class=\"bi bi-pencil\"></i>\n";
         $tbody .= "                    </a>\n";
-        $tbody .= "                    <a href=\"<?= site_url('{$viewFolder}/delete/' . \$row['id']) ?>\" class=\"btn btn-sm btn-outline-danger\" title=\"Eliminar\" onclick=\"return confirm('¿Seguro que desea eliminar este registro?')\">\n";
+        $tbody .= "                    <a href=\"<?= site_url('{$viewFolder}/delete/' . \$row['id']) ?>\" class=\"btn btn-sm btn-danger\" title=\"Eliminar\" onclick=\"return confirm('¿Seguro que desea eliminar este registro?')\">\n";
         $tbody .= "                        <i class=\"bi bi-trash\"></i>\n";
         $tbody .= "                    </a>\n";
         $tbody .= "                </td>\n";
 
         foreach ($fields as $field) {
+            if (!empty($field['auto_increment'])) continue;
             $tbody .= "                <td><?= \$row['{$field['name']}'] ?? '' ?></td>\n";
         }
 
