@@ -2,7 +2,7 @@
     <h1 class="mb-4">Crear {{viewFolder}}</h1>
 
     <form method="post" action="<?= site_url('{{viewFolder}}/store') ?>" class="needs-validation" novalidate>
-        <div class="row">
+        <div class="row border rounded shadow p-3">
             {{formFields}}
         </div>
 

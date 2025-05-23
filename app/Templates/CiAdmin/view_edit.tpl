@@ -2,13 +2,17 @@
     <h1 class="mb-4">Editar {{viewFolder}}</h1>
 
     <form method="post" action="<?= site_url('{{viewFolder}}/update/' . $row['id']) ?>" class="needs-validation" novalidate>
-        <div class="row">
+        <div class="row border rounded shadow p-3">
             {{formFields}}
         </div>
 
-        <div class="mt-4">
-            <button type="submit" class="btn btn-primary">Actualizar</button>
-            <a href="<?= site_url('{{viewFolder}}') ?>" class="btn btn-secondary">Volver al listado</a>
+        <div class="row mt-4">
+            <div class="col">
+                <a href="<?= site_url('{{viewFolder}}') ?>" class="btn btn-secondary">Volver al listado</a>
+            </div>
+            <div class="col text-end">
+                <button type="submit" class="btn btn-primary">Actualizar</button>
+            </div>
         </div>
     </form>
 </div>

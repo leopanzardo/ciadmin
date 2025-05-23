@@ -1,13 +1,13 @@
 <div class="container">
 	<h1 class="mb-4">Listado de {{viewFolder}}</h1>
 
-	<div class="mb-3">
-		<a href="<?= site_url('{{viewFolder}}/create') ?>" class="btn btn-success">Crear Nuevo</a>
+	<div class="mb-3 text-end">
+		<a href="<?= site_url('{{viewFolder}}/create') ?>" class="btn btn-success"><i class="bi bi-plus-square me-2"></i>Crear Nuevo</a>
 	</div>
 
 	<div class="table-responsive">
-		<table class="table table-striped table-bordered">
-			<thead class="table-dark">
+		<table class="table table-hover table-bordered">
+			<thead class="table-primary">
 				<tr>
 {{thead}}
 				</tr>

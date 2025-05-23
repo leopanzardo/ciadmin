@@ -39,30 +39,19 @@ if (!function_exists('displayFlashes')) {
 
         foreach ($alertTypes as $key => $bootstrapClass) {
             if (session()->getFlashdata($key)) {
-                $html .= <<<EOT
-<div class="alert alert-{$bootstrapClass} alert-dismissible fade show m-3" role="alert">
-    <?= session()->getFlashdata('{$key}') ?>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-</div>
-EOT;
+                $html .= '<div class="alert alert-' . $bootstrapClass . ' alert-dismissible fade show m-3" role="alert">' . session()->getFlashdata($key) . '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button></div>';
             }
         }
 
         // Mostrar errores de validación
         if (session()->getFlashdata('errors')) {
             $errors = session()->getFlashdata('errors');
-            $html .= <<<EOT
-<div class="alert alert-danger alert-dismissible fade show m-3" role="alert">
-    <ul class="mb-0">
-EOT;
+            $html .= '<div class="alert alert-danger alert-dismissible fade show m-3" role="alert">
+    <ul class="mb-0">';
             foreach ($errors as $error) {
-                $html .= "<li>{$error}</li>";
+                $html .= "<li>$error</li>";
             }
-            $html .= <<<EOT
-    </ul>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-</div>
-EOT;
+            $html .= '</ul><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button></div>';
         }
 
         return $html;
