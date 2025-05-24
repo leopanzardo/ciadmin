@@ -99,6 +99,19 @@ class {{controllerName}} extends BaseController
     }
 
     /**
+     * Muestra los detalles del registro seleccionado.
+     *
+     * @param int $id
+     * @return string
+     */
+    public function view($id)
+    {
+        $data['row'] = $this->model->find($id);
+        $data['title'] = 'Ver {{controllerName}}';
+        return renderCiAdminView('{{viewFolder}}/view', $data);
+    }
+
+    /**
      * Elimina un registro.
      *
      * @param int $id

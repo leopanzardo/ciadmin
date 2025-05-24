@@ -255,6 +255,22 @@ class MakeCiAdmin extends BaseCommand
             CLI::write("-> Vista edit generada: {$table}/edit.php", $force ? 'light_blue' : 'green');
             $this->viewsCreated++;
         }
+        
+        // View view
+        $viewViewPath = "{$viewDir}/view.php";
+        if (($force === false) && file_exists($viewViewPath)) {
+            CLI::write("-> Vista view ya existe: {$table}/view.php", 'orange');
+        } else {
+            $viewFields = $this->generateViewRowFields($fields);
+            $html = $this->renderTemplate("view_view", [
+                'viewFolder' => $table,
+                'rowFields' => $viewFields,
+            ]);
+            write_file($viewViewPath, $html);
+            CLI::write("-> Vista view generada: {$table}/view.php", $force ? 'light_blue' : 'green');
+            $this->viewsCreated++;
+        }
+
     }
     
     protected function generateDashboard(bool $force = false)
@@ -314,6 +330,7 @@ class MakeCiAdmin extends BaseCommand
     \$routes->get('{$table}', '{$className}::index');
     \$routes->get('{$table}/create', '{$className}::create');
     \$routes->post('{$table}/store', '{$className}::store');
+    \$routes->get('{$table}/view/(:num)', '{$className}::view/\$1');
     \$routes->get('{$table}/edit/(:num)', '{$className}::edit/\$1');
     \$routes->post('{$table}/update/(:num)', '{$className}::update/\$1');
     \$routes->get('{$table}/delete/(:num)', '{$className}::delete/\$1');
@@ -499,6 +516,9 @@ class MakeCiAdmin extends BaseCommand
         $tbody .= "            <tr>\n";
         $tbody .= "                <td>\n";
         $tbody .= "                    <div class=\"btn-group\">\n";
+        $tbody .= "                        <a href=\"<?= site_url('{$viewFolder}/view/' . \$row['id']) ?>\" class=\"btn btn-info\" title=\"Ver\">\n";
+        $tbody .= "                            <i class=\"bi bi-eye\"></i>\n";
+        $tbody .= "                        </a>\n";
         $tbody .= "                        <a href=\"<?= site_url('{$viewFolder}/edit/' . \$row['id']) ?>\" class=\"btn btn-primary\" title=\"Editar\">\n";
         $tbody .= "                            <i class=\"bi bi-pencil\"></i>\n";
         $tbody .= "                        </a>\n";
@@ -521,6 +541,25 @@ class MakeCiAdmin extends BaseCommand
         return [$thead, $tbody];
     }
     
+    protected function generateViewRowFields(array $fields): string
+    {
+        $html = "";
+
+        foreach ($fields as $field) {
+            $fieldName = $field['name'];
+            $label = ucfirst(str_replace('_', ' ', $fieldName));
+
+            $html .= <<<EOT
+                <div class="mb-3 col-md-6">
+                    <label class="form-label fw-bold">{$label}</label>
+                    <p class="form-control-plaintext border rounded py-2 px-3 bg-light"><?= \$row['{$fieldName}'] ?? '' ?></p>
+                </div>
+            EOT;
+        }
+
+        return $html;
+    }
+    
     protected function addRoutesForTable(string $className, string $table)
     {
         $this->routesToWrite[] = "\$routes->get('{$table}', '{$className}::index');";
@@ -531,6 +570,9 @@ class MakeCiAdmin extends BaseCommand
 
         $this->routesToWrite[] = "\$routes->post('{$table}/store', '{$className}::store');";
         $this->routesSummary[] = ['POST', "{$table}/store", "{$className}::store"];
+        
+        $this->routesToWrite[] = "\$routes->get('{$table}/view/(:num)', '{$className}::view/\$1');";
+        $this->routesSummary[] = ['GET', "{$table}/view/{id}", "{$className}::view"];
 
         $this->routesToWrite[] = "\$routes->get('{$table}/edit/(:num)', '{$className}::edit/\$1');";
         $this->routesSummary[] = ['GET', "{$table}/edit/{id}", "{$className}::edit"];

@@ -6,9 +6,13 @@
             {{formFields}}
         </div>
 
-        <div class="mt-4">
-            <button type="submit" class="btn btn-primary">Guardar</button>
-            <a href="<?= site_url('{{viewFolder}}') ?>" class="btn btn-secondary">Volver al listado</a>
+        <div class="row mt-4">
+            <div class="col">
+                <a href="<?= site_url('{{viewFolder}}') ?>" class="btn btn-secondary">Volver al listado</a>
+            </div>
+            <div class="col text-end">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
         </div>
     </form>
 </div>
