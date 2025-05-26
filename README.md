@@ -62,6 +62,9 @@ Esto generará automáticamente:
 - --table / -t
   Especifica una o más tablas (separadas por coma) para generar sus componentes.
   Ejemplo: --table users,posts
+  
+- --theme
+  Permite utilizar un tema de [Bootswatch](https://bootswatch.com/) para la aplicación generada, si no se define se utilizará el tema por defecto de Bootstrap.
 
 ⚠️ **Importante**: Al utilizar opciones como --appname, recordá escribirlas separadas por espacios. No uses el símbolo = como en --appname="Mi App", ya que CodeIgniter no parsea esa sintaxis. Usá en cambio --appname "Mi App".
 
@@ -86,6 +89,12 @@ Generar solo el modelo y controlador para la tabla clients:
 ```
 php spark make:ciadmin --only model --table clients
 php spark make:ciadmin --only controller --table clients
+```
+
+Utiliza el tema Minty de Bootswatch:
+
+```
+php spark make:ciadmin --theme minty
 ```
 
 ---

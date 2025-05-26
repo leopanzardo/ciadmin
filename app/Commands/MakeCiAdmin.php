@@ -23,6 +23,8 @@ class MakeCiAdmin extends BaseCommand
         '-a'       => 'Alias de --appname.',
         '--table' => 'Nombre de tabla o tablas (separados por coma) para las cuales generar los componentes.',
         '-t'      => 'Alias de --table.',
+        '--theme' => 'Nombre del tema de Bootswatch a utilizar, si no se especifica utilizará el tema por defecto de Bootstrap.'
+        
     ];
 
     protected array $reservedViewFolders = ['ciadmin', 'shared', 'system'];
@@ -31,6 +33,8 @@ class MakeCiAdmin extends BaseCommand
     protected int $modelsCreated = 0;
     protected int $controllersCreated = 0;
     protected int $viewsCreated = 0;
+    protected string $theme = 'default';
+    protected string $templatePath = APPPATH . 'Templates/CiAdmin/';
 
     public function run(array $params)
     {
@@ -41,6 +45,7 @@ class MakeCiAdmin extends BaseCommand
         $only = $params['only'] ?? $params['o'] ?? null;
         $specificTables = $params['table'] ?? $params['t'] ?? null;
         $appName = $params['appname'] ?? $params['a'] ?? null;
+        $this->theme = $params['theme'] ?? 'default';
 
         // Si se pasa un nuevo nombre de aplicación, actualizamos la constante
         if ($appName) {
@@ -286,7 +291,7 @@ class MakeCiAdmin extends BaseCommand
         }
 
         $viewPath = APPPATH . "Views/dashboard.php";
-        $templatePath = APPPATH . "Templates/CiAdmin/dashboard_view.php"; // <- Cambiamos esto
+        $templatePath = $this->templatePath . "dashboard_view.php"; // <- Cambiamos esto
 
         if (($force === false) && file_exists($viewPath)) {
             CLI::write("dashboard.php ya existe, no se sobrescribe.", 'orange');
@@ -299,6 +304,23 @@ class MakeCiAdmin extends BaseCommand
                 CLI::error("-> No se encontró el template dashboard_view.php para el Dashboard.");
             }
         }
+        
+        $headerTemplatePath = $this->templatePath . 'header.tpl';
+        $headerTargetPath = APPPATH . 'Views/ciadmin/header.php';
+
+        $templateData = [
+            'APPNAME' => '<?= CIADMIN_APPNAME ?>',
+            'DisplayFlashes' => '<?= displayFlashes() ?>',
+            'BootstrapThemeURL' => $this->theme === 'default'
+                ? 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css'
+                : "https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.3/" . $this->theme . "/bootstrap.min.css",
+        ];
+
+        $headerHtml = $this->parseTemplate(file_get_contents($headerTemplatePath), $templateData);
+        write_file($headerTargetPath, $headerHtml);
+
+        CLI::write("Vista header generada: ciadmin/header.php", $force ? 'light_blue' : 'green');
+        $this->viewsCreated++;
 
         // Modificar o agregar la ruta '/'
         $routesFile = APPPATH . 'Config/Routes.php';
@@ -350,7 +372,7 @@ class MakeCiAdmin extends BaseCommand
     
     protected function renderTemplate(string $templateName, array $vars = []): string
     {
-        $templatePath = APPPATH . "Templates/CiAdmin/{$templateName}.tpl";
+        $templatePath = $this->templatePath . "{$templateName}.tpl";
         if (!file_exists($templatePath)) {
             CLI::error("No se encuentra el template: {$templateName}.tpl");
             return '';
@@ -552,7 +574,7 @@ class MakeCiAdmin extends BaseCommand
             $html .= <<<EOT
                 <div class="mb-3 col-md-6">
                     <label class="form-label fw-bold">{$label}</label>
-                    <p class="form-control-plaintext border rounded py-2 px-3 bg-light"><?= \$row['{$fieldName}'] ?? '' ?></p>
+                    <p class="form-control-plaintext border rounded py-2 px-3 bg-light"><?= \$row['{$fieldName}'] ?? '&nbsp;' ?></p>
                 </div>
             EOT;
         }
