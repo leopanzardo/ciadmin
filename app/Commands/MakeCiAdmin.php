@@ -35,6 +35,7 @@ class MakeCiAdmin extends BaseCommand
     protected int $viewsCreated = 0;
     protected string $theme = 'default';
     protected string $templatePath = APPPATH . 'Templates/CiAdmin/';
+    protected string $bootstrapTheme = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css';
 
     public function run(array $params)
     {
@@ -307,16 +308,17 @@ class MakeCiAdmin extends BaseCommand
         
         $headerTemplatePath = $this->templatePath . 'header.tpl';
         $headerTargetPath = APPPATH . 'Views/ciadmin/header.php';
+        if ($this->theme != 'default') {
+            $this->bootstrapTheme = $this->getBootswatchThemeCDN($this->theme);
+        }
 
         $templateData = [
             'APPNAME' => '<?= CIADMIN_APPNAME ?>',
             'DisplayFlashes' => '<?= displayFlashes() ?>',
-            'BootstrapThemeURL' => $this->theme === 'default'
-                ? 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css'
-                : "https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.3/" . $this->theme . "/bootstrap.min.css",
+            'BootstrapThemeURL' => $this->bootstrapTheme,
         ];
 
-        $headerHtml = $this->parseTemplate(file_get_contents($headerTemplatePath), $templateData);
+        $headerHtml = parseTemplate(file_get_contents($headerTemplatePath), $templateData);
         write_file($headerTargetPath, $headerHtml);
 
         CLI::write("Vista header generada: ciadmin/header.php", $force ? 'light_blue' : 'green');
@@ -689,5 +691,30 @@ class MakeCiAdmin extends BaseCommand
         // Guardamos los cambios
         write_file($constantsPath, $content);
     }
+    
+    protected function fetchBootswatchThemes(): array
+    {
+        $apiUrl = 'https://bootswatch.com/api/5.json';
+        $json = @file_get_contents($apiUrl);
+        if ($json === false) {
+            CLI::error("No se pudo obtener la lista de temas desde Bootswatch.");
+            return [];
+        }
+        $data = json_decode($json, true);
+        return $data['themes'] ?? [];
+    }
+    
+    protected function getBootswatchThemeCDN(string $theme): ?string
+    {
+        $cssLink = $this->bootstrapTheme;
+        $themes = $this->fetchBootswatchThemes();
+        foreach ($themes as $t) {
+            if (strcasecmp($t['name'], $theme) === 0) {
+                $cssLink = $t['cssCdn'];
+            }
+        }
+        return $cssLink;
+    }
+
 
 }
