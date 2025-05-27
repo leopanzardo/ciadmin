@@ -1,7 +1,7 @@
 <div class="container">
     <h1 class="mb-4">Editar {{viewFolder}}</h1>
 
-    <form method="post" action="<?= site_url('{{viewFolder}}/update/' . $row['id']) ?>" class="needs-validation" novalidate>
+    <form method="post" action="<?= site_url('{{viewFolder}}/update/' . $row[$primaryKey]) ?>" class="needs-validation" novalidate>
         <div class="row border rounded shadow p-3">
             {{formFields}}
         </div>

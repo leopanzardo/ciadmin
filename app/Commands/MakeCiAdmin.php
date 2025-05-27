@@ -109,9 +109,10 @@ class MakeCiAdmin extends BaseCommand
             return;
         }
 
-        $fields = $this->getTableFields($table);
+        $fieldData = $this->getTableFields($table);
+        $fields = $fieldData['fields'];
 
-        $primaryKey = 'id';
+        $primaryKey = $fieldData['primaryKey'];
         $useAutoIncrement = false;
         $useSoftDeletes = false;
         $useTimestamps = false;
@@ -182,7 +183,8 @@ class MakeCiAdmin extends BaseCommand
             return;
         }
 
-        $fields = $this->getTableFields($table);
+        $fieldData = $this->getTableFields($table);
+        $fields = $fieldData['fields'];
 
         $code = $this->renderTemplate('controller', [
             'controllerName' => $className,
@@ -213,14 +215,15 @@ class MakeCiAdmin extends BaseCommand
             mkdir($viewDir, 0755, true);
         }
 
-        $fields = $this->getTableFields($table);
+        $fieldData = $this->getTableFields($table);
+        $fields = $fieldData['fields'];
 
         // Index view
         $indexViewPath = "{$viewDir}/index.php";
         if (($force === false) && file_exists($indexViewPath)) {
             CLI::write("-> Vista index ya existe: {$table}/index.php", 'orange');
         } else {
-            list($thead, $tbody) = $this->generateTableFields($fields, $table);
+            list($thead, $tbody) = $this->generateTableFields($fieldData, $table);
 
             $html = $this->renderTemplate("view_index", [
                 'viewFolder' => $table,
@@ -343,35 +346,6 @@ class MakeCiAdmin extends BaseCommand
         }
     }
     
-    protected function appendRoutes(string $className, string $table)
-    {
-        $routesFile = APPPATH . 'Config/Routes.php';
-
-        // Código de rutas a agregar
-        $newRoutes = <<<ROUTES
-
-    // --- Rutas generadas automáticamente para {$className}
-    \$routes->get('{$table}', '{$className}::index');
-    \$routes->get('{$table}/create', '{$className}::create');
-    \$routes->post('{$table}/store', '{$className}::store');
-    \$routes->get('{$table}/view/(:num)', '{$className}::view/\$1');
-    \$routes->get('{$table}/edit/(:num)', '{$className}::edit/\$1');
-    \$routes->post('{$table}/update/(:num)', '{$className}::update/\$1');
-    \$routes->get('{$table}/delete/(:num)', '{$className}::delete/\$1');
-
-    ROUTES;
-
-        // Verificamos que no se hayan agregado antes
-        $routesContents = file_get_contents($routesFile);
-
-        if (strpos($routesContents, "\$routes->get('{$table}'") === false) {
-            file_put_contents($routesFile, $newRoutes, FILE_APPEND);
-            CLI::write("-> Rutas agregadas para: {$className}", 'green');
-        } else {
-            CLI::write("-> Las rutas para {$className} ya existen en Routes.php", 'orange');
-        }
-    }
-    
     protected function renderTemplate(string $templateName, array $vars = []): string
     {
         $templatePath = $this->templatePath . "{$templateName}.tpl";
@@ -395,9 +369,13 @@ class MakeCiAdmin extends BaseCommand
         $fieldsData = $db->getFieldData($table);
 
         $fields = [];
+        $primaryKey = 'id';
+        $primaryKeyIsNumeric = false;
+        
         foreach ($fieldsData as $field) {
             $isInteger = in_array(strtolower($field->type), ['int', 'bigint', 'smallint', 'mediumint', 'tinyint']);
             $isPrimaryKey = property_exists($field, 'primary_key') && $field->primary_key;
+            
             $fields[] = [
                 'name'            => $field->name,
                 'type'            => strtolower($field->type),
@@ -406,9 +384,18 @@ class MakeCiAdmin extends BaseCommand
                 'auto_increment'  => $isPrimaryKey && $isInteger,
                 'not_null'        => property_exists($field, 'nullable') ? !$field->nullable : false,
             ];
+
+            if ($isPrimaryKey) {
+                $primaryKey = $field->name;
+                if ($isInteger) $primaryKeyIsNumeric = true;
+            }
         }
 
-        return $fields;
+        return [
+            'fields' => $fields,
+            'primaryKey' => $primaryKey,
+            'primaryKeyIsNumeric' => $primaryKeyIsNumeric,
+        ];
     }
     
     protected function generateFormFields(array $fields, string $source = 'post'): string
@@ -520,15 +507,19 @@ class MakeCiAdmin extends BaseCommand
         return $rulesString;
     }
     
-    protected function generateTableFields(array $fields, string $viewFolder): array
+    protected function generateTableFields(array $fieldData, string $viewFolder): array
     {
+        $fields = $fieldData['fields'];
+        $primaryKey = $fieldData['primaryKey'];
+        
         // Campos a excluir del listado
         $excludedFields = ['created_at', 'updated_at', 'deleted_at'];
+        $textTypes = ['text', 'tinytext', 'mediumtext', 'longtext', 'blob', 'tinyblob', 'mediumblob', 'longblob'];
         
         // Encabezados de la tabla
         $thead = "                <th>Acciones</th>\n";
         foreach ($fields as $field) {
-            if (!empty($field['auto_increment']) || in_array($field['name'], $excludedFields, true)) {
+            if (!empty($field['auto_increment']) || in_array($field['name'], $excludedFields, true) || in_array($field['type'], $textTypes)) {
                 continue;
             }
             $thead .= "                <th>" . ucfirst(str_replace('_', ' ', $field['name'])) . "</th>\n";
@@ -540,20 +531,20 @@ class MakeCiAdmin extends BaseCommand
         $tbody .= "            <tr>\n";
         $tbody .= "                <td>\n";
         $tbody .= "                    <div class=\"btn-group\">\n";
-        $tbody .= "                        <a href=\"<?= site_url('{$viewFolder}/view/' . \$row['id']) ?>\" class=\"btn btn-info\" title=\"Ver\">\n";
+        $tbody .= "                        <a href=\"<?= site_url('{$viewFolder}/view/' . \$row['{$primaryKey}']) ?>\" class=\"btn btn-info\" title=\"Ver\">\n";
         $tbody .= "                            <i class=\"bi bi-eye\"></i>\n";
         $tbody .= "                        </a>\n";
-        $tbody .= "                        <a href=\"<?= site_url('{$viewFolder}/edit/' . \$row['id']) ?>\" class=\"btn btn-primary\" title=\"Editar\">\n";
+        $tbody .= "                        <a href=\"<?= site_url('{$viewFolder}/edit/' . \$row['{$primaryKey}']) ?>\" class=\"btn btn-primary\" title=\"Editar\">\n";
         $tbody .= "                            <i class=\"bi bi-pencil\"></i>\n";
         $tbody .= "                        </a>\n";
-        $tbody .= "                        <a href=\"<?= site_url('{$viewFolder}/delete/' . \$row['id']) ?>\" class=\"btn btn-danger\" title=\"Eliminar\" onclick=\"return confirm('¿Seguro que desea eliminar este registro?')\">\n";
+        $tbody .= "                        <a href=\"<?= site_url('{$viewFolder}/delete/' . \$row['{$primaryKey}']) ?>\" class=\"btn btn-danger\" title=\"Eliminar\" onclick=\"return confirm('¿Seguro que desea eliminar este registro?')\">\n";
         $tbody .= "                            <i class=\"bi bi-trash\"></i>\n";
         $tbody .= "                        </a>\n";
         $tbody .= "                    </div>\n";
         $tbody .= "                </td>\n";
 
         foreach ($fields as $field) {
-            if (!empty($field['auto_increment']) || in_array($field['name'], $excludedFields, true)) {
+            if (!empty($field['auto_increment']) || in_array($field['name'], $excludedFields, true) || in_array($field['type'], $textTypes)) {
                 continue;
             }
             $tbody .= "                <td><?= \$row['{$field['name']}'] ?? '' ?></td>\n";
@@ -586,6 +577,10 @@ class MakeCiAdmin extends BaseCommand
     
     protected function addRoutesForTable(string $className, string $table)
     {
+        $fieldData = $this->getTableFields($table);
+        $primaryKey = $fieldData['primaryKey'];
+        $paramType = $fieldData['primaryKeyIsNumeric'] ? ':num' : ':segment';
+        
         $this->routesToWrite[] = "\$routes->get('{$table}', '{$className}::index');";
         $this->routesSummary[] = ['GET', "{$table}", "{$className}::index"];
 
@@ -595,17 +590,17 @@ class MakeCiAdmin extends BaseCommand
         $this->routesToWrite[] = "\$routes->post('{$table}/store', '{$className}::store');";
         $this->routesSummary[] = ['POST', "{$table}/store", "{$className}::store"];
         
-        $this->routesToWrite[] = "\$routes->get('{$table}/view/(:num)', '{$className}::view/\$1');";
-        $this->routesSummary[] = ['GET', "{$table}/view/{id}", "{$className}::view"];
+        $this->routesToWrite[] = "\$routes->get('{$table}/view/({$paramType})', '{$className}::view/\$1');";
+        $this->routesSummary[] = ['GET', "{$table}/view/{$primaryKey}", "{$className}::view"];
 
-        $this->routesToWrite[] = "\$routes->get('{$table}/edit/(:num)', '{$className}::edit/\$1');";
-        $this->routesSummary[] = ['GET', "{$table}/edit/{id}", "{$className}::edit"];
+        $this->routesToWrite[] = "\$routes->get('{$table}/edit/({$paramType})', '{$className}::edit/\$1');";
+        $this->routesSummary[] = ['GET', "{$table}/edit/{$primaryKey}", "{$className}::edit"];
 
-        $this->routesToWrite[] = "\$routes->post('{$table}/update/(:num)', '{$className}::update/\$1');";
-        $this->routesSummary[] = ['POST', "{$table}/update/{id}", "{$className}::update"];
+        $this->routesToWrite[] = "\$routes->post('{$table}/update/({$paramType})', '{$className}::update/\$1');";
+        $this->routesSummary[] = ['POST', "{$table}/update/{$primaryKey}", "{$className}::update"];
 
-        $this->routesToWrite[] = "\$routes->get('{$table}/delete/(:num)', '{$className}::delete/\$1');";
-        $this->routesSummary[] = ['GET', "{$table}/delete/{id}", "{$className}::delete"];
+        $this->routesToWrite[] = "\$routes->get('{$table}/delete/({$paramType})', '{$className}::delete/\$1');";
+        $this->routesSummary[] = ['GET', "{$table}/delete/{$primaryKey}", "{$className}::delete"];
     }
     
     protected function showGenerationSummary()

@@ -10,7 +10,7 @@
                 <a href="<?= site_url('{{viewFolder}}') ?>" class="btn btn-secondary">Volver al listado</a>
             </div>
             <div class="col text-end">
-                <a href="<?= site_url('{{viewFolder}}/edit/' . $row['id']) ?>" class="btn btn-primary">Editar</a>
+                <a href="<?= site_url('{{viewFolder}}/edit/' . $row[$primaryKey]) ?>" class="btn btn-primary">Editar</a>
             </div>
         </div>
 

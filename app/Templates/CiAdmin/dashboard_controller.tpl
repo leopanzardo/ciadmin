@@ -18,19 +18,15 @@ class Dashboard extends BaseController
             $pageTitle .= ' - ' . ucfirst($dbName);
         }
 
-        return $this->renderDashboard('dashboard', [
+        $data = [
             'title'   => $pageTitle,
             'modules' => $tables,
             'dbName'  => $dbName,
-        ]);
+        ];
+        
+        return view('ciadmin/header', $data)
+            . view('dashboard', $data)
+            . view('ciadmin/footer', $data);
     }
-
-    private function renderDashboard(string $contentView, array $data = []): string
-    {
-        $html  = view('ciadmin/header', $data);
-        $html .= view($contentView, $data);
-        $html .= view('ciadmin/footer', $data);
-
-        return $html;
-    }
+    
 }

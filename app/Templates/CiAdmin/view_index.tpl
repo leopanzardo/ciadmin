@@ -18,6 +18,8 @@
 		</table>
 	</div>
 	
+	<?= $pager->links('{{viewFolder}}', 'ciadmin') ?>
+	
 	<div class="mt-4">
 		<a href="<?= site_url('/') ?>" class="btn btn-secondary">
 			<i class="bi bi-arrow-left"></i> Volver al Dashboard

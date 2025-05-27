@@ -22,7 +22,8 @@ class {{controllerName}} extends BaseController
      */
     public function index()
     {
-        $data['rows'] = $this->model->findAll();
+        $data['rows'] = $this->model->paginate(20, '{{viewFolder}}');
+        $data['pager'] = $this->model->pager;
         $data['title'] = '{{controllerName}} - Listado';
         return renderCiAdminView('{{viewFolder}}/index', $data);
     }
@@ -70,6 +71,7 @@ class {{controllerName}} extends BaseController
     public function edit($id)
     {
         $data['row'] = $this->model->find($id);
+        $data['primaryKey'] = $this->model->primaryKey;
         $data['title'] = 'Editar {{controllerName}}';
         return renderCiAdminView('{{viewFolder}}/edit', $data);
     }
@@ -107,6 +109,7 @@ class {{controllerName}} extends BaseController
     public function view($id)
     {
         $data['row'] = $this->model->find($id);
+        $data['primaryKey'] = $this->model->primaryKey;
         $data['title'] = 'Ver {{controllerName}}';
         return renderCiAdminView('{{viewFolder}}/view', $data);
     }
