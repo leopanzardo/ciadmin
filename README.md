@@ -29,7 +29,7 @@ Este proyecto utiliza CodeIgniter 4, por lo que el proceso de instalación y con
 
 ## ⚙️ Uso
 
-Una vez que tu proyecto esté correctamente configurado, ejecutá el siguiente comando en una terminal desde la raíz del proyecto:
+Una vez que tu proyecto esté correctamente configurado, hayas instalado las dependencias de CodeIgniter corriendo composer install, ejecutá el siguiente comando en una terminal desde la raíz del proyecto:
 
 ```
 php spark make:ciadmin

@@ -284,6 +284,7 @@ class MakeCiAdmin extends BaseCommand
     
     protected function generateDashboard(bool $force = false)
     {
+        CLI::write("Procesando Dashboard", 'light_blue');
         $controllerPath = APPPATH . "Controllers/Dashboard.php";
         if (($force === false) && file_exists($controllerPath)) {
             CLI::write("-> Dashboard.php ya existe, no se sobrescribe.", 'orange');
@@ -298,7 +299,7 @@ class MakeCiAdmin extends BaseCommand
         $templatePath = $this->templatePath . "dashboard_view.php"; // <- Cambiamos esto
 
         if (($force === false) && file_exists($viewPath)) {
-            CLI::write("dashboard.php ya existe, no se sobrescribe.", 'orange');
+            CLI::write("-> dashboard.php ya existe, no se sobrescribe.", 'orange');
         } else {
             if (file_exists($templatePath)) {
                 copy($templatePath, $viewPath);
@@ -324,7 +325,7 @@ class MakeCiAdmin extends BaseCommand
         $headerHtml = parseTemplate(file_get_contents($headerTemplatePath), $templateData);
         write_file($headerTargetPath, $headerHtml);
 
-        CLI::write("Vista header generada: ciadmin/header.php", $force ? 'light_blue' : 'green');
+        CLI::write("-> Vista header generada: ciadmin/header.php", $force ? 'light_blue' : 'green');
         $this->viewsCreated++;
 
         // Modificar o agregar la ruta '/'
