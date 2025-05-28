@@ -1,6 +1,7 @@
-# CIAdmin
+# CIAdmin v1.0.0
 
 ![CIAdmin](https://img.shields.io/badge/Administrador%20de%20Bases%20de%20Datos-CodeIgniter%204-EF4223?style=for-the-badge&logo=codeigniter&logoColor=white&labelColor=4223ef)
+![Versión](https://img.shields.io/badge/versión-1.0.0-EF4223?style=for-the-badge&labelColor=4223ef)
 
 ![PHP](https://img.shields.io/badge/PHP-8.1+-777BB4?style=for-the-badge&logo=php&logoSize=auto)
 ![CodeIgniter](https://img.shields.io/badge/CodeIgniter-4.x-EF4223?style=for-the-badge&logo=codeigniter&logoColor=white&logoSize=auto)
