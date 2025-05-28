@@ -2,6 +2,12 @@
 
 ![CIAdmin](https://img.shields.io/badge/Administrador%20de%20Bases%20de%20Datos-CodeIgniter%204-EF4223?style=for-the-badge&logo=codeigniter&logoColor=white&labelColor=4223ef)
 
+![PHP](https://img.shields.io/badge/PHP-8.1+-777BB4?style=for-the-badge&logo=php&logoSize=auto)
+![CodeIgniter](https://img.shields.io/badge/CodeIgniter-4.x-EF4223?style=for-the-badge&logo=codeigniter&logoColor=white&logoSize=auto)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3.x-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white&logoSize=auto)
+![Bootswatch](https://img.shields.io/badge/Bootswatch-Themes-18BC9C?style=for-the-badge&logo=bootstrap&logoColor=white&logoSize=auto)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+
 ## Crea tu panel de administración en segundos con CodeIgniter
 
 ---
