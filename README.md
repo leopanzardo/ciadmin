@@ -15,6 +15,37 @@ La idea es que funcione como punto de partida para cualquier aplicación que req
 
 ---
 
+## 🖼️ Capturas de pantalla
+
+<table>
+  <tr>
+    <td><strong>Dashboard</strong></td>
+    <td><strong>Listado</strong></td>
+  </tr>
+  <tr>
+    <td><img src="https://i.imgur.com/XF0Repf.png" width="400"/></td>
+    <td><img src="https://i.imgur.com/DfF13nw.png" width="400"/></td>
+  </tr>
+  <tr>
+    <td><strong>Detalles</strong></td>
+    <td><strong>Editar</strong></td>
+  </tr>
+  <tr>
+    <td><img src="https://i.imgur.com/NWY8YZx.png" width="400"/></td>
+    <td><img src="https://i.imgur.com/JxYL8oe.png" width="400"/></td>
+  </tr>
+  <tr>
+    <td><strong>Crear</strong></td>
+    <td><strong>Eliminar</strong></td>
+  </tr>
+  <tr>
+    <td><img src="https://i.imgur.com/Goch7rB.png" width="400"/></td>
+    <td><img src="https://i.imgur.com/y3RnKFu.png" width="400"/></td>
+  </tr>
+</table>
+
+---
+
 ## 🚀 Instalación y configuración
 
 Este proyecto utiliza CodeIgniter 4, por lo que el proceso de instalación y configuración es el mismo que en cualquier aplicación basada en este framework.
