@@ -30,24 +30,24 @@ La idea es que funcione como punto de partida para cualquier aplicación que req
     <td><strong>Listado</strong></td>
   </tr>
   <tr>
-    <td><img src="https://i.imgur.com/XF0Repf.png" width="400"/></td>
-    <td><img src="https://i.imgur.com/DfF13nw.png" width="400"/></td>
+    <td><img src="public/screenshots/classic-models-dashboard.png" width="400"/></td>
+    <td><img src="public/screenshots/classic-models-customers-index.png" width="400"/></td>
   </tr>
   <tr>
     <td><strong>Detalles</strong></td>
     <td><strong>Editar</strong></td>
   </tr>
   <tr>
-    <td><img src="https://i.imgur.com/NWY8YZx.png" width="400"/></td>
-    <td><img src="https://i.imgur.com/JxYL8oe.png" width="400"/></td>
+    <td><img src="public/screenshots/classic-models-employees-detalles.png" width="400"/></td>
+    <td><img src="public/screenshots/classic-models-offices-editar.png" width="400"/></td>
   </tr>
   <tr>
     <td><strong>Crear</strong></td>
     <td><strong>Eliminar</strong></td>
   </tr>
   <tr>
-    <td><img src="https://i.imgur.com/Goch7rB.png" width="400"/></td>
-    <td><img src="https://i.imgur.com/y3RnKFu.png" width="400"/></td>
+    <td><img src="public/screenshots/classic-models-products-crear.png" width="400"/></td>
+    <td><img src="public/screenshots/classic-models-orders-eliminar.png" width="400"/></td>
   </tr>
 </table>
 
