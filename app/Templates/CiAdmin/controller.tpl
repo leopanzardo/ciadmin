@@ -122,13 +122,17 @@ class {{controllerName}} extends BaseController
      */
     public function delete($id)
     {
+        if (!$this->request->is('delete')) {
+            return $this->response->setStatusCode(405)->setHeader('Allow', 'DELETE');
+        }
+
         if ($this->model->delete($id)) {
             session()->setFlashdata('success', 'Registro eliminado correctamente.');
         } else {
             session()->setFlashdata('error', 'Error al eliminar el registro.');
         }
 
-        return redirect()->to('{{viewFolder}}');
+        return redirect()->to('{{viewFolder}}')->withCookies();
     }
 
     /**

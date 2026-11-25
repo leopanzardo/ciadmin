@@ -94,7 +94,16 @@ class Routing extends BaseRouting
      *
      * If FALSE, will stop searching and do NO automatic routing.
      */
-    public bool $autoRoute = true;
+    public bool $autoRoute = false;
+
+    /**
+     * If TRUE, the system will look for attributes on controller
+     * class and methods that can run before and after the
+     * controller/method.
+     *
+     * If FALSE, will ignore any attributes.
+     */
+    public bool $useControllerAttributes = true;
 
     /**
      * For Defined Routes.

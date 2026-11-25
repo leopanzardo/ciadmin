@@ -1,9 +1,11 @@
-# CIAdmin v1.0.0
+# CIAdmin v1.1.0
 
 ![CIAdmin](https://img.shields.io/badge/Administrador%20de%20Bases%20de%20Datos-CodeIgniter%204-EF4223?style=for-the-badge&logo=codeigniter&logoColor=white&labelColor=4223ef)
-![Versión](https://img.shields.io/badge/versión-1.0.0-EF4223?style=for-the-badge&labelColor=4223ef)
+![Versión](https://img.shields.io/badge/versión-1.1.0-EF4223?style=for-the-badge&labelColor=4223ef)
 
-![PHP](https://img.shields.io/badge/PHP-8.1+-777BB4?style=for-the-badge&logo=php&logoSize=auto)
+[Historial de cambios](CHANGELOG.md) · [Roadmap](ROADMAP.md)
+
+![PHP](https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoSize=auto)
 ![CodeIgniter](https://img.shields.io/badge/CodeIgniter-4.x-EF4223?style=for-the-badge&logo=codeigniter&logoColor=white&logoSize=auto)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3.x-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white&logoSize=auto)
 ![Bootswatch](https://img.shields.io/badge/Bootswatch-Themes-18BC9C?style=for-the-badge&logo=bootstrap&logoColor=white&logoSize=auto)
@@ -96,6 +98,7 @@ Esto generará automáticamente:
   Genera solo un tipo de componente. Valores posibles:
     model, controller, view, routes, dashboard
   Ejemplo: --only view
+  También se aceptan los alias `models`, `controllers` y `views`.
 
 - --table / -t
   Especifica una o más tablas (separadas por coma) para generar sus componentes.
@@ -135,6 +138,10 @@ Utiliza el tema Minty de Bootswatch:
 php spark make:ciadmin --theme minty
 ```
 
+Al regenerar rutas con `--table`, se conservan las rutas de los demás módulos y las rutas personalizadas. Las rutas CRUD generadas usan enrutamiento explícito.
+
+Para migrar un módulo generado anteriormente, actualizá su vista de listado y su controlador junto con sus rutas. El botón de borrado envía un formulario protegido por CSRF a la ruta `DELETE`. Si personalizaste esos archivos, integrá los cambios antes de usar `--force`.
+
 ---
 
 ### 🧪 Probar la aplicación
@@ -161,7 +168,7 @@ Podés ejecutar la aplicación con:
 
 Se recomienda cumplir con los requisitos mínimos de CodeIgniter 4:
 
-- PHP 8.1 o superior
+- PHP 8.2 o superior
 - Composer
 - MySQL o compatible
 - Servidor Web (Apache, Nginx, etc.)

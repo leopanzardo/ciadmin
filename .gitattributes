@@ -14,9 +14,6 @@
 *.sh text eol=lf
 *.bat text eol=crlf
 
-# No trackear cambios de permisos en archivos
-* -diff
-
 # Linguist: ignora /vendor y /writable para el lenguaje principal del repo
 /vendor/* linguist-vendored
 /writable/* linguist-vendored
