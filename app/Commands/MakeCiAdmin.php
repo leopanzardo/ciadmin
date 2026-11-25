@@ -17,7 +17,7 @@ class MakeCiAdmin extends BaseCommand
     protected $options = [
         '--force' => 'Sobrescribe archivos existentes.',
         '-f'      => 'Alias de --force.',
-        '--only'  => 'Regenera solo las rutas.',
+        '--only'  => 'Genera solo model, controller, view, routes o dashboard.',
         '-o'      => 'Alias de --only.',
         '--appname' => 'Nombre de la aplicación a usar en el dashboard y el header.',
         '-a'       => 'Alias de --appname.',
@@ -35,7 +35,7 @@ class MakeCiAdmin extends BaseCommand
     protected int $viewsCreated = 0;
     protected string $theme = 'default';
     protected string $templatePath = APPPATH . 'Templates/CiAdmin/';
-    protected string $bootstrapTheme = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css';
+    protected string $bootstrapTheme = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css';
 
     public function run(array $params)
     {
@@ -44,6 +44,16 @@ class MakeCiAdmin extends BaseCommand
         // Manejar parámetros
         $force = array_key_exists('force', $params) || array_key_exists('f', $params);
         $only = $params['only'] ?? $params['o'] ?? null;
+        $only = match ($only) {
+            'models' => 'model',
+            'controllers' => 'controller',
+            'views' => 'view',
+            default => $only,
+        };
+        if (!in_array($only, [null, 'model', 'controller', 'view', 'routes', 'dashboard'], true)) {
+            CLI::error('Opción --only inválida. Usá model, controller, view, routes o dashboard.');
+            return EXIT_ERROR;
+        }
         $specificTables = $params['table'] ?? $params['t'] ?? null;
         $appName = $params['appname'] ?? $params['a'] ?? null;
         $this->theme = $params['theme'] ?? 'default';
@@ -72,13 +82,13 @@ class MakeCiAdmin extends BaseCommand
 
             CLI::write("Procesando tabla: {$table}", 'light_blue');
 
-            if (!$only || $only === 'models') {
+            if (!$only || $only === 'model') {
                 $this->generateModel($className, $table, $force);
             }
-            if (!$only || $only === 'controllers') {
+            if (!$only || $only === 'controller') {
                 $this->generateController($className, $table, $force);
             }
-            if (!$only || $only === 'views') {
+            if (!$only || $only === 'view') {
                 $this->generateViews($className, $table, $force);
             }
 
@@ -88,11 +98,13 @@ class MakeCiAdmin extends BaseCommand
         }
 
         if (!$only || $only === 'dashboard') {
-            $this->generateDashboard($force);
+            $this->generateDashboard($force, isset($params['theme']));
         }
 
-        if (!$only || $only === 'routes') {
-            $this->generateRoutesFile();
+        if (!$only || $only === 'routes' || $only === 'dashboard') {
+            if (!$this->generateRoutesFile(!$only || $only === 'dashboard')) {
+                return EXIT_ERROR;
+            }
         }
 
         $this->showGenerationSummary();
@@ -282,7 +294,7 @@ class MakeCiAdmin extends BaseCommand
 
     }
     
-    protected function generateDashboard(bool $force = false)
+    protected function generateDashboard(bool $force = false, bool $changeTheme = false)
     {
         CLI::write("Procesando Dashboard", 'light_blue');
         $controllerPath = APPPATH . "Controllers/Dashboard.php";
@@ -312,14 +324,13 @@ class MakeCiAdmin extends BaseCommand
         
         $headerTemplatePath = $this->templatePath . 'header.tpl';
         $headerTargetPath = APPPATH . 'Views/ciadmin/header.php';
-        if ($this->theme != 'default') {
-            $this->bootstrapTheme = $this->getBootswatchThemeCDN($this->theme);
+        if (!$force && !$changeTheme && is_file($headerTargetPath)) {
+            return;
         }
-
         $templateData = [
             'APPNAME' => '<?= CIADMIN_APPNAME ?>',
             'DisplayFlashes' => '<?= displayFlashes() ?>',
-            'BootstrapThemeURL' => $this->bootstrapTheme,
+            'BootstrapThemeURL' => $this->getBootswatchThemeCDN($this->theme),
         ];
 
         $headerHtml = parseTemplate(file_get_contents($headerTemplatePath), $templateData);
@@ -328,23 +339,6 @@ class MakeCiAdmin extends BaseCommand
         CLI::write("-> Vista header generada: ciadmin/header.php", $force ? 'light_blue' : 'green');
         $this->viewsCreated++;
 
-        // Modificar o agregar la ruta '/'
-        $routesFile = APPPATH . 'Config/Routes.php';
-        $routesContents = file_get_contents($routesFile);
-
-        if (preg_match("/\\\$routes->get\\(\s*'\/'\s*,/", $routesContents)) {
-            $routesContents = preg_replace(
-                "/\\\$routes->get\\(\s*'\/'\s*,\s*'[^']+'\s*\);/",
-                "\$routes->get('/', 'Dashboard::index');",
-                $routesContents
-            );
-            file_put_contents($routesFile, $routesContents);
-            CLI::write("* Ruta '/' actualizada para usar Dashboard::index.", 'green');
-        } else {
-            $newRoute = "\n//* Ruta principal generada automáticamente\n\$routes->get('/', 'Dashboard::index');\n";
-            file_put_contents($routesFile, $newRoute, FILE_APPEND);
-            CLI::write("* Ruta '/' creada para usar Dashboard::index.", 'green');
-        }
     }
     
     protected function renderTemplate(string $templateName, array $vars = []): string
@@ -538,10 +532,12 @@ class MakeCiAdmin extends BaseCommand
         $tbody .= "                        <a href=\"<?= site_url('{$viewFolder}/edit/' . \$row['{$primaryKey}']) ?>\" class=\"btn btn-primary\" title=\"Editar\">\n";
         $tbody .= "                            <i class=\"bi bi-pencil\"></i>\n";
         $tbody .= "                        </a>\n";
-        $tbody .= "                        <a href=\"<?= site_url('{$viewFolder}/delete/' . \$row['{$primaryKey}']) ?>\" class=\"btn btn-danger\" title=\"Eliminar\" onclick=\"return confirm('¿Seguro que desea eliminar este registro?')\">\n";
-        $tbody .= "                            <i class=\"bi bi-trash\"></i>\n";
-        $tbody .= "                        </a>\n";
         $tbody .= "                    </div>\n";
+        $tbody .= "                    <form method=\"post\" class=\"d-inline-block\" action=\"<?= esc(site_url('{$viewFolder}/delete/' . rawurlencode((string) \$row['{$primaryKey}'])), 'attr') ?>\" onsubmit=\"return confirm('¿Seguro que desea eliminar este registro?')\">\n";
+        $tbody .= "                        <?= csrf_field() ?>\n";
+        $tbody .= "                        <input type=\"hidden\" name=\"_method\" value=\"DELETE\">\n";
+        $tbody .= "                        <button type=\"submit\" class=\"btn btn-danger\" aria-label=\"Eliminar\" title=\"Eliminar\"><i class=\"bi bi-trash\"></i></button>\n";
+        $tbody .= "                    </form>\n";
         $tbody .= "                </td>\n";
 
         foreach ($fields as $field) {
@@ -600,8 +596,8 @@ class MakeCiAdmin extends BaseCommand
         $this->routesToWrite[] = "\$routes->post('{$table}/update/({$paramType})', '{$className}::update/\$1');";
         $this->routesSummary[] = ['POST', "{$table}/update/{$primaryKey}", "{$className}::update"];
 
-        $this->routesToWrite[] = "\$routes->get('{$table}/delete/({$paramType})', '{$className}::delete/\$1');";
-        $this->routesSummary[] = ['GET', "{$table}/delete/{$primaryKey}", "{$className}::delete"];
+        $this->routesToWrite[] = "\$routes->delete('{$table}/delete/({$paramType})', '{$className}::delete/\$1', ['filter' => 'csrf']);";
+        $this->routesSummary[] = ['DELETE', "{$table}/delete/{$primaryKey}", "{$className}::delete"];
     }
     
     protected function showGenerationSummary()
@@ -629,38 +625,68 @@ class MakeCiAdmin extends BaseCommand
         CLI::table($this->routesSummary, $routesHeaders);
     }
     
-    protected function generateRoutesFile()
+    protected function generateRoutesFile(bool $includeDashboard): bool
     {
-        $content = <<<PHP
-    <?php
-
-    use CodeIgniter\\Router\\RouteCollection;
-
-    /**
-     * @var RouteCollection \$routes
-     */
-
-    \$routes->setDefaultNamespace('App\\Controllers');
-    \$routes->setDefaultController('Dashboard');
-    \$routes->setDefaultMethod('index');
-    \$routes->setTranslateURIDashes(false);
-    \$routes->set404Override();
-    \$routes->setAutoRoute(false);
-
-    // Ruta principal
-    \$routes->get('/', 'Dashboard::index');
-
-    // Rutas generadas automáticamente
-    PHP;
-
-        foreach ($this->routesToWrite as $route) {
-            $content .= "\n" . $route;
-        }
-
         $routesPath = APPPATH . 'Config/Routes.php';
-        write_file($routesPath, $content);
-
-        CLI::write("Archivo Routes.php sobrescrito exitosamente.", 'green');
+        $original = file_get_contents($routesPath);
+        if ($original === false) {
+            CLI::error('No se pudo leer Routes.php.');
+            return false;
+        }
+        $eol = str_contains($original, "\r\n") ? "\r\n" : "\n";
+        $lines = preg_split('/\r\n|\n|\r/', rtrim($original, "\r\n"));
+        $knownRoutes = array_fill_keys(array_map('trim', $lines), true);
+        $legacyDeletes = [];
+        foreach ($this->routesToWrite as $route) {
+            if (str_starts_with($route, '$routes->delete(')) {
+                $legacy = str_replace(
+                    ['->delete(', ", ['filter' => 'csrf']"],
+                    ['->get(', ''],
+                    $route
+                );
+                $legacyDeletes[$legacy] = isset($knownRoutes[$route]) ? null : $route;
+                if (isset($knownRoutes[$legacy])) {
+                    $knownRoutes[$route] = true;
+                }
+            }
+        }
+        $content = [];
+        foreach ($lines as $line) {
+            $statement = trim($line);
+            if (array_key_exists($statement, $legacyDeletes)) {
+                if ($legacyDeletes[$statement] !== null) {
+                    $content[] = $legacyDeletes[$statement];
+                    $legacyDeletes[$statement] = null;
+                }
+                continue;
+            }
+            $content[] = $line;
+        }
+        if ($includeDashboard) {
+            $homeRoute = '$routes->get(\'/\', \'Home::index\');';
+            $dashboardRoute = '$routes->get(\'/\', \'Dashboard::index\');';
+            $homeIndex = array_search($homeRoute, array_map('trim', $content), true);
+            if ($homeIndex !== false) {
+                $content[$homeIndex] = $dashboardRoute;
+            } elseif (!preg_match('~\$routes->(?:get|add|match)\h*\([^\r\n]*[\x22\x27]/[\x22\x27]~', $original)) {
+                $content[] = $dashboardRoute;
+            }
+        }
+        foreach ($this->routesToWrite as $route) {
+            if (!isset($knownRoutes[$route])) {
+                $content[] = $route;
+                $knownRoutes[$route] = true;
+            }
+        }
+        if ($this->routesToWrite !== [] && !isset($knownRoutes['$routes->setAutoRoute(false);'])) {
+            $content[] = '$routes->setAutoRoute(false);';
+        }
+        $updated = implode($eol, $content) . $eol;
+        if ($updated !== $original && !write_file($routesPath, $updated)) {
+            CLI::error('No se pudo actualizar Routes.php.');
+            return false;
+        }
+        return true;
     }
     
     protected function updateAppNameConstant(string $appName): void
@@ -688,28 +714,23 @@ class MakeCiAdmin extends BaseCommand
         write_file($constantsPath, $content);
     }
     
-    protected function fetchBootswatchThemes(): array
+    protected function getBootswatchThemeCDN(string $theme): string
     {
-        $apiUrl = 'https://bootswatch.com/api/5.json';
-        $json = @file_get_contents($apiUrl);
-        if ($json === false) {
-            CLI::error("No se pudo obtener la lista de temas desde Bootswatch.");
-            return [];
+        $theme = strtolower($theme);
+        if ($theme === 'default') {
+            return $this->bootstrapTheme;
         }
-        $data = json_decode($json, true);
-        return $data['themes'] ?? [];
-    }
-    
-    protected function getBootswatchThemeCDN(string $theme): ?string
-    {
-        $cssLink = $this->bootstrapTheme;
-        $themes = $this->fetchBootswatchThemes();
-        foreach ($themes as $t) {
-            if (strcasecmp($t['name'], $theme) === 0) {
-                $cssLink = $t['cssCdn'];
-            }
+        $themes = [
+            'brite', 'cerulean', 'cosmo', 'cyborg', 'darkly', 'flatly', 'journal',
+            'litera', 'lumen', 'lux', 'materia', 'minty', 'morph', 'pulse', 'quartz',
+            'sandstone', 'simplex', 'sketchy', 'slate', 'solar', 'spacelab',
+            'superhero', 'united', 'vapor', 'yeti', 'zephyr',
+        ];
+        if (!in_array($theme, $themes, true)) {
+            CLI::write("Tema Bootswatch desconocido: {$theme}. Se usará Bootstrap.", 'yellow');
+            return $this->bootstrapTheme;
         }
-        return $cssLink;
+        return "https://cdn.jsdelivr.net/npm/bootswatch@5.3.8/dist/{$theme}/bootstrap.min.css";
     }
 
 
